@@ -3,7 +3,10 @@ const VERSION = "1.0.0";
 const CONFIG_URL =
 "https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
-// cache-free fetch helper
+let latestData = null;
+
+// ---------------- FETCH CONFIG ----------------
+
 async function fetchConfig() {
   const res = await fetch(CONFIG_URL + "?t=" + Date.now(), {
     cache: "no-store"
@@ -14,25 +17,33 @@ async function fetchConfig() {
   return await res.json();
 }
 
-// APPLY EVERYTHING FROM SERVER
+// ---------------- APPLY CONFIG (NO UPDATE TEXT HERE) ----------------
+
 function applyConfig(data) {
-  document.getElementById("news").innerText = data.message || "No news";
-  document.getElementById("title").innerText = data.title || "WOEBLOCKS PLAYER";
+  latestData = data;
+
+  document.getElementById("news").innerText =
+    data.message || "No news";
+
+  document.getElementById("title").innerText =
+    "WOEBLOCKS PLAYER"; // NEVER change title for updates
 
   const placeId = data.robloxPlaceId || "0";
 
-  // update status
-  if (data.version !== VERSION) {
-    document.getElementById("status").innerText =
-      "Update Available: " + data.version;
+  // ALWAYS HIDE UPDATE BUTTON BY DEFAULT
+  document.getElementById("updateBtn").style.display = "none";
 
-    document.getElementById("updateBtn").style.display = "inline-block";
+  // silent version check (no UI spam)
+  const isOutdated = data.version !== VERSION;
+
+  if (isOutdated) {
+    // we only PREPARE update, do NOT show anything yet
+    window._updateAvailable = true;
   } else {
-    document.getElementById("status").innerText =
-      "Up to date";
+    window._updateAvailable = false;
   }
 
-  // attach play logic dynamically
+  // play function
   window.play = () => {
     if (placeId === "0") return;
 
@@ -41,26 +52,56 @@ function applyConfig(data) {
   };
 }
 
-// MAIN LOAD FUNCTION
-async function loadConfig() {
+// ---------------- UPDATE SYSTEM ----------------
+
+async function runUpdate() {
+  document.getElementById("status").innerText = "Updating...";
+
   try {
     const data = await fetchConfig();
+
     applyConfig(data);
-  } catch (err) {
-    console.log("CONFIG ERROR:", err);
+
+    // AFTER SUCCESSFUL UPDATE ONLY
     document.getElementById("status").innerText =
-      "Failed to load config";
+      "Update completed successfully";
+
+  } catch (err) {
+    console.log(err);
+    document.getElementById("status").innerText =
+      "Update failed";
   }
 }
 
-// AUTO REFRESH SYSTEM (THIS IS WHAT YOU WANT)
-setInterval(loadConfig, 15000); // every 15 seconds
+// ---------------- MANUAL UPDATE BUTTON ----------------
 
-// INITIAL LOAD
-loadConfig();
-
-// MANUAL UPDATE BUTTON
 function manualUpdate() {
-  document.getElementById("status").innerText = "Updating...";
-  loadConfig();
+  runUpdate();
 }
+
+// ---------------- BACKGROUND CHECK (SILENT) ----------------
+
+async function backgroundCheck() {
+  try {
+    const data = await fetchConfig();
+
+    applyConfig(data);
+
+    // ONLY SHOW BUTTON IF OUTDATED
+    if (data.version !== VERSION) {
+      document.getElementById("updateBtn").style.display = "inline-block";
+      document.getElementById("status").innerText = " ";
+    } else {
+      document.getElementById("updateBtn").style.display = "none";
+      document.getElementById("status").innerText = "";
+    }
+
+  } catch (err) {
+    console.log("BG CHECK FAILED", err);
+  }
+}
+
+// ---------------- INIT ----------------
+
+backgroundCheck();
+setInterval(backgroundCheck, 15000);
