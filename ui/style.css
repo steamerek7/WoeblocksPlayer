@@ -14,4 +14,22 @@ body {
 }
 
 button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
+button:hover {
+  opacity: 0.9;
+}
+
+#updateBtn {
+  background: #ffb300;
+}
+
+#updateBtn:hover {
+  background: #ffaa00;
+}
