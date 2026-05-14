@@ -5,13 +5,19 @@ const CONFIG_URL =
 
 let placeId = "0";
 
-// load config from GitHub
 async function loadConfig() {
   try {
-    const res = await fetch(CONFIG_URL);
+    const res = await fetch(CONFIG_URL + "?t=" + Date.now(), {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
     const data = await res.json();
 
-    document.getElementById("news").innerText = data.message;
+    document.getElementById("news").innerText = data.message || "No news";
     document.getElementById("title").innerText = data.title || "WOEBLOCKS PLAYER";
 
     placeId = data.robloxPlaceId || "0";
@@ -25,7 +31,7 @@ async function loadConfig() {
     }
 
   } catch (err) {
-    console.log(err);
+    console.log("CONFIG ERROR:", err);
     document.getElementById("status").innerText =
       "Failed to load config";
   }
