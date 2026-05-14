@@ -27,12 +27,17 @@ body {
 
 input {
   width: 100%;
-  padding: 12px;
+  box-sizing: border-box;
+  padding: 12px 14px;
   margin: 8px 0;
+
   border: none;
   border-radius: 8px;
+
   background: rgba(255,255,255,0.08);
   color: white;
+
+  outline: none;
 }
 
 button {
@@ -44,6 +49,7 @@ button {
   background: #22c55e;
   color: white;
   cursor: pointer;
+  font-weight: bold;
 }
 
 a {
@@ -69,9 +75,35 @@ a {
 
 <script>
 function create() {
-    const user = document.getElementById("user").value;
+    const user = document.getElementById("user").value.trim();
     const pass = document.getElementById("pass").value;
 
+    // ---------------- USERNAME RULES ----------------
+    const regex = /^[a-zA-Z0-9_]+$/;
+
+    if (user.length < 3 || user.length > 20) {
+        alert("Username must be 3-20 characters");
+        return;
+    }
+
+    if (!regex.test(user)) {
+        alert("Only letters, numbers, and _ allowed");
+        return;
+    }
+
+    const underscoreCount = (user.match(/_/g) || []).length;
+    if (underscoreCount > 1) {
+        alert("Only 1 underscore allowed");
+        return;
+    }
+
+    // ---------------- PASSWORD RULES ----------------
+    if (pass.length < 8) {
+        alert("Password must be at least 8 characters");
+        return;
+    }
+
+    // ---------------- STORAGE ----------------
     let users = JSON.parse(localStorage.getItem("users") || "{}");
 
     if (users[user]) {
@@ -82,7 +114,7 @@ function create() {
     users[user] = pass;
     localStorage.setItem("users", JSON.stringify(users));
 
-    // 🔑 AUTO LOGIN AFTER REGISTER
+    // auto login
     localStorage.setItem("currentUser", user);
 
     window.location.href = "../homepage/index.html";
