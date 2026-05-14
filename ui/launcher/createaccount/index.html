@@ -61,60 +61,61 @@ button {
   <input id="pass" type="password" placeholder="Password">
 
   <button onclick="create()">Create</button>
+
+  <p><a href="../login/index.html" style="color:#60a5fa;">Back to login</a></p>
 </div>
 
-<!-- FIREBASE SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 <script>
-// 🔥 YOUR FIREBASE CONFIG (PASTE YOUR OWN HERE)
 const firebaseConfig = {
   apiKey: "AIzaSyA55tbdWKeAUIGBn4fyGqV90WU1UoIKVb0",
   authDomain: "woeblocks.firebaseapp.com",
-  projectId: "https://woeblocks-default-rtdb.europe-west1.firebasedatabase.app",
-  storageBucket: "woeblocks.firebasestorage.app",
+  projectId: "woeblocks",
+  storageBucket: "woeblocks.appspot.com",
   messagingSenderId: "235450732055",
   appId: "1:235450732055:web:ce19a097b14fc27870d652"
 };
 
-// INIT FIREBASE
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// VALIDATION RULES
-function valid(user, pass) {
-  const regex = /^[a-zA-Z0-9_]+$/;
-
-  if (user.length < 3 || user.length > 20) return "Username 3-20 chars";
-  if (!regex.test(user)) return "Only letters, numbers, _ allowed";
-  if ((user.match(/_/g) || []).length > 1) return "Only 1 underscore allowed";
-  if (pass.length < 8) return "Password min 8 chars";
-
-  return null;
-}
-
-// CREATE ACCOUNT
 async function create() {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value;
 
-  const error = valid(user, pass);
-  if (error) {
-    alert(error);
+  const regex = /^[a-zA-Z0-9_]+$/;
+
+  // ---------------- VALIDATION ----------------
+  if (user.length < 3 || user.length > 20) {
+    alert("Username must be 3-20 characters");
+    return;
+  }
+
+  if (!regex.test(user)) {
+    alert("Only letters, numbers and _ allowed");
+    return;
+  }
+
+  if ((user.match(/_/g) || []).length > 1) {
+    alert("Only 1 underscore allowed");
+    return;
+  }
+
+  if (pass.length < 8) {
+    alert("Password must be at least 8 characters");
     return;
   }
 
   try {
-    const docRef = db.collection("users").doc(user);
-    const doc = await docRef.get();
+    // ---------------- CHECK IF EXISTS ----------------
+    const doc = await db.collection("users").doc(user).get();
 
     if (doc.exists) {
       alert("User already exists");
       return;
     }
 
-    await docRef.set({
+    // ---------------- CREATE ACCOUNT ----------------
+    await db.collection("users").doc(user).set({
       username: user,
       password: pass,
       createdAt: Date.now(),
