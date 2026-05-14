@@ -1,5 +1,6 @@
 {
-  "version": "1.0.2",
-  "message": "Launcher connected successfully",
+  "version": "1.0.1",
+  "title": "WOEBLOCKS PLAYER",
+  "message": "Welcome! Launcher system is live.",
   "robloxPlaceId": "1234567890"
 }
