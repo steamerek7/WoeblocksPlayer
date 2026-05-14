@@ -3,6 +3,8 @@ const VERSION = "1.0.0";
 const CONFIG_URL =
 "https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
+let placeId = "0";
+
 async function loadConfig() {
   try {
     const res = await fetch(CONFIG_URL + "?t=" + Date.now(), {
@@ -11,29 +13,25 @@ async function loadConfig() {
 
     const data = await res.json();
 
-    // ONLY NEWS
-    document.getElementById("news").innerText =
-      data.message || "";
-
-    // NEVER TOUCH TITLE
+    // ALWAYS STATIC TITLE
     document.getElementById("title").innerText =
       "WOEBLOCKS PLAYER";
 
-    const upToDate = data.version === VERSION;
+    document.getElementById("news").innerText =
+      data.message || "";
 
-    // CLEAN BUTTON LOGIC ONLY
+    placeId = data.robloxPlaceId || "0";
+
     const btn = document.getElementById("updateBtn");
 
-    if (!upToDate) {
+    // ONLY SHOW OR HIDE BUTTON
+    if (data.version !== VERSION) {
       btn.style.display = "inline-block";
       document.getElementById("status").innerText = "";
     } else {
       btn.style.display = "none";
       document.getElementById("status").innerText = "";
     }
-
-    // store placeId for play
-    window.placeId = data.robloxPlaceId || "0";
 
   } catch (err) {
     console.log(err);
@@ -43,16 +41,20 @@ async function loadConfig() {
 }
 
 function play() {
-  if (!window.placeId || window.placeId === "0") return;
+  if (placeId === "0") return;
 
   window.location.href =
-    "https://www.roblox.com/games/start?placeId=" + window.placeId;
+    "https://www.roblox.com/games/start?placeId=" + placeId;
 }
 
 function manualUpdate() {
   document.getElementById("status").innerText = "Updating...";
 
   loadConfig().then(() => {
+    const btn = document.getElementById("updateBtn");
+
+    btn.style.display = "none";
+
     document.getElementById("status").innerText =
       "Update completed successfully";
   });
