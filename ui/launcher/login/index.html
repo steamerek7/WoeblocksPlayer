@@ -23,6 +23,7 @@ body {
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
   text-align: center;
+  box-sizing: border-box;
 }
 
 input {
@@ -44,12 +45,20 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
+
   border: none;
   border-radius: 8px;
+
   background: #3b82f6;
   color: white;
+
   cursor: pointer;
   font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 a {
@@ -74,18 +83,51 @@ a {
 </div>
 
 <script>
-function login() {
-    const user = document.getElementById("user").value.trim();
-    const pass = document.getElementById("pass").value;
+const API_URL = "http://86.92.135.221:3000";
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
+async function login() {
+  const user = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value;
 
-    if (users[user] && users[user] === pass) {
-        localStorage.setItem("currentUser", user);
-        window.location.href = "../homepage/index.html";
+  if (!user || !pass) {
+    alert("Fill in all fields");
+    return;
+  }
+
+  const btn = document.querySelector("button");
+  btn.disabled = true;
+  btn.innerText = "Logging in...";
+
+  try {
+    const res = await fetch(API_URL + "/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: user,
+        password: pass
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("currentUser", user);
+      localStorage.setItem("sessionActive", "true");
+
+      window.location.href = "../homepage/index.html";
     } else {
-        alert("Wrong username or password");
+      alert(data.message || "Wrong username or password");
     }
+
+  } catch (err) {
+    alert("Server not reachable");
+    console.log(err);
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Login";
 }
 </script>
 
