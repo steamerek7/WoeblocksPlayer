@@ -27,12 +27,17 @@ body {
 
 input {
   width: 100%;
-  padding: 12px;
+  box-sizing: border-box;
+  padding: 12px 14px;
   margin: 8px 0;
+
   border: none;
   border-radius: 8px;
+
   background: rgba(255,255,255,0.08);
   color: white;
+
+  outline: none;
 }
 
 button {
@@ -44,6 +49,7 @@ button {
   background: #3b82f6;
   color: white;
   cursor: pointer;
+  font-weight: bold;
 }
 
 a {
@@ -69,15 +75,13 @@ a {
 
 <script>
 function login() {
-    const user = document.getElementById("user").value;
+    const user = document.getElementById("user").value.trim();
     const pass = document.getElementById("pass").value;
 
     const users = JSON.parse(localStorage.getItem("users") || "{}");
 
     if (users[user] && users[user] === pass) {
-        // 🔑 KEEP SESSION
         localStorage.setItem("currentUser", user);
-
         window.location.href = "../homepage/index.html";
     } else {
         alert("Wrong username or password");
