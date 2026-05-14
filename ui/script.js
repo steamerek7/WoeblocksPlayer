@@ -1,7 +1,7 @@
 const CONFIG_URL =
 "https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
-let placeId = "0";
+let config = null;
 
 // ---------------- VERSION STORAGE ----------------
 function getVersion() {
@@ -12,33 +12,6 @@ function setVersion(v) {
   localStorage.setItem("installedVersion", v);
 }
 
-// ---------------- UI ----------------
-function render(data) {
-  const installedVersion = getVersion();
-
-  // VERSION ON TOP
-  document.getElementById("status").innerText =
-    "v" + installedVersion;
-
-  // TITLE FROM GITHUB (THIS IS WHAT YOU MEAN)
-  document.getElementById("title").innerText =
-    data.title || "WOEBLOCKS PLAYER";
-
-  // NEWS
-  document.getElementById("news").innerText =
-    data.message || "";
-
-  placeId = data.robloxPlaceId || "0";
-
-  // UPDATE BUTTON
-  const btn = document.getElementById("updateBtn");
-  btn.style.display = "none";
-
-  if (data.version !== installedVersion) {
-    btn.style.display = "inline-block";
-  }
-}
-
 // ---------------- LOAD CONFIG ----------------
 async function loadConfig() {
   try {
@@ -47,22 +20,50 @@ async function loadConfig() {
     });
 
     const data = await res.json();
+    config = data;
 
-    render(data);
+    // 🔥 DEBUG (THIS IS IMPORTANT)
+    console.log("GITHUB DATA:", data);
+
+    const installedVersion = getVersion();
+
+    // ================= UI =================
+
+    // version ON TOP of title
+    document.getElementById("status").innerText =
+      "v" + installedVersion;
+
+    // title from GitHub (NO HARDCODE)
+    document.getElementById("title").innerText =
+      data.title || "NO TITLE FOUND";
+
+    document.getElementById("news").innerText =
+      data.message || "NO MESSAGE";
+
+    // ================= PLACE ID =================
+    const placeId = data.robloxPlaceId || "0";
+
+    // ================= UPDATE BUTTON =================
+    const btn = document.getElementById("updateBtn");
+    btn.style.display = "none";
+
+    if (data.version !== installedVersion) {
+      btn.style.display = "inline-block";
+    }
+
+    // ================= PLAY =================
+    window.play = function () {
+      if (!placeId || placeId === "0") return;
+
+      window.location.href =
+        "https://www.roblox.com/games/start?placeId=" + placeId;
+    };
 
   } catch (err) {
-    console.log(err);
+    console.log("CONFIG ERROR:", err);
     document.getElementById("status").innerText =
-      "Failed to load config";
+      "FAILED TO LOAD CONFIG";
   }
-}
-
-// ---------------- PLAY ----------------
-function play() {
-  if (!placeId || placeId === "0") return;
-
-  window.location.href =
-    "https://www.roblox.com/games/start?placeId=" + placeId;
 }
 
 // ---------------- UPDATE ----------------
@@ -73,8 +74,13 @@ async function manualUpdate() {
   document.getElementById("status").innerText = "Updating...";
 
   try {
-    const res = await fetch(CONFIG_URL + "?t=" + Date.now());
+    const res = await fetch(CONFIG_URL + "?t=" + Date.now(), {
+      cache: "no-store"
+    });
+
     const data = await res.json();
+
+    console.log("UPDATE DATA:", data);
 
     setVersion(data.version);
 
@@ -94,4 +100,4 @@ async function manualUpdate() {
 
 // ---------------- INIT ----------------
 loadConfig();
-setInterval(loadConfig, 15000);
+setInterval(loadConfig, 10000);
