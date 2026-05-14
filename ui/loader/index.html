@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loading...</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .bar {
+      width: 300px;
+      height: 10px;
+      background: #222;
+      margin-top: 20px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: #00ff88;
+      animation: load 2.5s forwards;
+    }
+
+    @keyframes load {
+      to { width: 100%; }
+    }
+
+    img {
+      width: 120px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <img src="logo.png" />
+
+  <h2>Loading Woeblocks Player...</h2>
+
+  <div class="bar">
+    <div class="fill"></div>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      window.location.href = "../index.html";
+    }, 3000);
+  </script>
+
+</body>
+</html>
