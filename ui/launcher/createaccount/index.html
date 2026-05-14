@@ -62,75 +62,52 @@ button {
 
   <button onclick="create()">Create</button>
 
-  <p><a href="../login/index.html" style="color:#60a5fa;">Back to login</a></p>
+  <p><a href="../login/index.html" style="color:#60a5fa">Back to login</a></p>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA55tbdWKeAUIGBn4fyGqV90WU1UoIKVb0",
+  apiKey: "YOUR_KEY",
   authDomain: "woeblocks.firebaseapp.com",
+  databaseURL: "https://woeblocks-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "woeblocks",
   storageBucket: "woeblocks.appspot.com",
   messagingSenderId: "235450732055",
   appId: "1:235450732055:web:ce19a097b14fc27870d652"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-async function create() {
+window.create = async function () {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value;
 
   const regex = /^[a-zA-Z0-9_]+$/;
 
-  // ---------------- VALIDATION ----------------
-  if (user.length < 3 || user.length > 20) {
-    alert("Username must be 3-20 characters");
-    return;
-  }
+  if (user.length < 3 || user.length > 20) return alert("Username 3-20 chars");
+  if (!regex.test(user)) return alert("Only letters, numbers, _ allowed");
+  if ((user.match(/_/g) || []).length > 1) return alert("Only 1 underscore allowed");
+  if (pass.length < 8) return alert("Password must be 8+ chars");
 
-  if (!regex.test(user)) {
-    alert("Only letters, numbers and _ allowed");
-    return;
-  }
+  const userRef = ref(db, "users/" + user);
+  const snap = await get(userRef);
 
-  if ((user.match(/_/g) || []).length > 1) {
-    alert("Only 1 underscore allowed");
-    return;
-  }
+  if (snap.exists()) return alert("User already exists");
 
-  if (pass.length < 8) {
-    alert("Password must be at least 8 characters");
-    return;
-  }
+  await set(userRef, {
+    username: user,
+    password: pass,
+    robux: 100,
+    createdAt: Date.now()
+  });
 
-  try {
-    // ---------------- CHECK IF EXISTS ----------------
-    const doc = await db.collection("users").doc(user).get();
-
-    if (doc.exists) {
-      alert("User already exists");
-      return;
-    }
-
-    // ---------------- CREATE ACCOUNT ----------------
-    await db.collection("users").doc(user).set({
-      username: user,
-      password: pass,
-      createdAt: Date.now(),
-      robux: 100
-    });
-
-    localStorage.setItem("currentUser", user);
-
-    window.location.href = "../homepage/index.html";
-
-  } catch (err) {
-    console.log(err);
-    alert("Error creating account");
-  }
-}
+  localStorage.setItem("currentUser", user);
+  window.location.href = "../homepage/index.html";
+};
 </script>
 
 </body>
