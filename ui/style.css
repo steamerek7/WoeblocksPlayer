@@ -13,29 +13,12 @@ body {
   text-align: center;
 }
 
-h1 {
-  font-size: 22px;
-}
-
-#status {
-  margin: 10px;
-  color: gray;
-}
-
-#news {
-  background: #1a1a1a;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 8px;
-  width: 350px;
-}
-
 button {
+  margin-top: 20px;
   padding: 12px 25px;
-  border: none;
   background: #00ff88;
-  color: black;
-  font-weight: bold;
+  border: none;
   cursor: pointer;
+  font-weight: bold;
   border-radius: 8px;
 }
