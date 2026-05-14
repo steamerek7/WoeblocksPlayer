@@ -22,38 +22,38 @@ async function loadConfig() {
     const data = await res.json();
     config = data;
 
-    // 🔥 DEBUG (THIS IS IMPORTANT)
     console.log("GITHUB DATA:", data);
 
     const installedVersion = getVersion();
 
     // ================= UI =================
+    const statusEl = document.getElementById("status");
+    const titleEl = document.getElementById("title");
+    const newsEl = document.getElementById("news");
+    const btn = document.getElementById("updateBtn");
 
-    // version ON TOP of title
-    document.getElementById("status").innerText =
-      "v" + installedVersion;
+    if (!statusEl || !titleEl || !newsEl || !btn) return;
 
-    // title from GitHub (NO HARDCODE)
-    document.getElementById("title").innerText =
-      data.title || "NO TITLE FOUND";
+    statusEl.innerText = "v" + installedVersion;
 
-    document.getElementById("news").innerText =
-      data.message || "NO MESSAGE";
-
-    // ================= PLACE ID =================
-    const placeId = data.robloxPlaceId || "0";
+    titleEl.innerText = data.title || "NO TITLE FOUND";
+    newsEl.innerText = data.message || "NO MESSAGE";
 
     // ================= UPDATE BUTTON =================
-    const btn = document.getElementById("updateBtn");
     btn.style.display = "none";
 
-    if (data.version !== installedVersion) {
+    if (data.version && data.version !== installedVersion) {
       btn.style.display = "inline-block";
     }
 
-    // ================= PLAY =================
+    // ================= PLAY FUNCTION =================
     window.play = function () {
-      if (!placeId || placeId === "0") return;
+      const placeId = data.robloxPlaceId || "0";
+
+      if (!placeId || placeId === "0") {
+        alert("No placeId set in config");
+        return;
+      }
 
       window.location.href =
         "https://www.roblox.com/games/start?placeId=" + placeId;
@@ -61,17 +61,21 @@ async function loadConfig() {
 
   } catch (err) {
     console.log("CONFIG ERROR:", err);
-    document.getElementById("status").innerText =
-      "FAILED TO LOAD CONFIG";
+
+    const statusEl = document.getElementById("status");
+    if (statusEl) {
+      statusEl.innerText = "FAILED TO LOAD CONFIG";
+    }
   }
 }
 
 // ---------------- UPDATE ----------------
 async function manualUpdate() {
   const btn = document.getElementById("updateBtn");
+  const statusEl = document.getElementById("status");
 
-  btn.style.display = "none";
-  document.getElementById("status").innerText = "Updating...";
+  if (btn) btn.style.display = "none";
+  if (statusEl) statusEl.innerText = "Updating...";
 
   try {
     const res = await fetch(CONFIG_URL + "?t=" + Date.now(), {
@@ -82,10 +86,13 @@ async function manualUpdate() {
 
     console.log("UPDATE DATA:", data);
 
-    setVersion(data.version);
+    if (data.version) {
+      setVersion(data.version);
 
-    document.getElementById("status").innerText =
-      "Updated to v" + data.version;
+      if (statusEl) {
+        statusEl.innerText = "Updated to v" + data.version;
+      }
+    }
 
     setTimeout(() => {
       window.location.reload();
@@ -93,8 +100,10 @@ async function manualUpdate() {
 
   } catch (err) {
     console.log(err);
-    document.getElementById("status").innerText =
-      "Update failed";
+
+    if (statusEl) {
+      statusEl.innerText = "Update failed";
+    }
   }
 }
 
