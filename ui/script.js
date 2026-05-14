@@ -12,16 +12,31 @@ function setVersion(v) {
   localStorage.setItem("installedVersion", v);
 }
 
-// ---------------- UI UPDATE ----------------
-function renderUI(installedVersion, remoteData) {
-  // VERSION ON TOP OF TITLE (your request)
+// ---------------- UI ----------------
+function render(data) {
+  const installedVersion = getVersion();
+
+  // VERSION ON TOP
+  document.getElementById("status").innerText =
+    "v" + installedVersion;
+
+  // TITLE FROM GITHUB (THIS IS WHAT YOU MEAN)
   document.getElementById("title").innerText =
-    "WOEBLOCKS PLAYER | v" + installedVersion;
+    data.title || "WOEBLOCKS PLAYER";
 
+  // NEWS
   document.getElementById("news").innerText =
-    remoteData.message || "";
+    data.message || "";
 
-  placeId = remoteData.robloxPlaceId || "0";
+  placeId = data.robloxPlaceId || "0";
+
+  // UPDATE BUTTON
+  const btn = document.getElementById("updateBtn");
+  btn.style.display = "none";
+
+  if (data.version !== installedVersion) {
+    btn.style.display = "inline-block";
+  }
 }
 
 // ---------------- LOAD CONFIG ----------------
@@ -33,18 +48,7 @@ async function loadConfig() {
 
     const data = await res.json();
 
-    const installedVersion = getVersion();
-
-    // render UI first
-    renderUI(installedVersion, data);
-
-    const btn = document.getElementById("updateBtn");
-    btn.style.display = "none";
-
-    // update check
-    if (data.version !== installedVersion) {
-      btn.style.display = "inline-block";
-    }
+    render(data);
 
   } catch (err) {
     console.log(err);
@@ -72,7 +76,6 @@ async function manualUpdate() {
     const res = await fetch(CONFIG_URL + "?t=" + Date.now());
     const data = await res.json();
 
-    // SAVE VERSION (THIS IS KEY FIX)
     setVersion(data.version);
 
     document.getElementById("status").innerText =
