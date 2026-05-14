@@ -1,7 +1,7 @@
 const VERSION = "1.0.0";
 
 const CONFIG_URL =
-"https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/refs/heads/main/version.json?token=GHSAT0AAAAAAD3W26VTZGMETERKCKL55AWI2QGBFNQ";
+"https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
 let placeId = "0";
 
