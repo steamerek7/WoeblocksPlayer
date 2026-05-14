@@ -1,6 +1,6 @@
 {
   "title": "Woeblocks Player",
-  "version": "1.0.3",
-  "message": "Changed database to Firebase",
+  "version": "1.0.3.1",
+  "message": "Fixed account creation error",
   "robloxPlaceId": "121268060261990"
 }
