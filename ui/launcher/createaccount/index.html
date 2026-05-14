@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Account</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: radial-gradient(circle at top, #1b1f2a, #0b0d12);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .box {
+            width: 360px;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #22c55e;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>Create Account</h1>
+
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+
+    <button onclick="create()">Create</button>
+
+    <div class="link">
+        Already have one? <a href="../login/index.html">Login</a>
+    </div>
+</div>
+
+<script>
+function create() {
+    const user = document.getElementById("user").value;
+    const pass = document.getElementById("pass").value;
+
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (users[user]) {
+        alert("User already exists");
+        return;
+    }
+
+    users[user] = pass;
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Account created");
+    window.location.href = "../login/index.html";
+}
+</script>
+
+</body>
+</html>
