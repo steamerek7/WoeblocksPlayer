@@ -31,13 +31,10 @@ input {
   box-sizing: border-box;
   padding: 12px 14px;
   margin: 8px 0;
-
   border: none;
   border-radius: 8px;
-
   background: rgba(255,255,255,0.08);
   color: white;
-
   outline: none;
 }
 
@@ -45,26 +42,12 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
-
   border: none;
   border-radius: 8px;
-
   background: #3b82f6;
   color: white;
-
   cursor: pointer;
   font-weight: bold;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-a {
-  color: #60a5fa;
-  font-size: 12px;
-  text-decoration: none;
 }
 </style>
 </head>
@@ -82,9 +65,26 @@ a {
   <p><a href="../createaccount/index.html">Create account</a></p>
 </div>
 
-<script>
-const API_URL = "http://86.92.135.221:3000";
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
+<script>
+// 🔥 YOUR CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyA55tbdWKeAUIGBn4fyGqV90WU1UoIKVb0",
+  authDomain: "woeblocks.firebaseapp.com",
+  projectId: "woeblocks",
+  storageBucket: "woeblocks.firebasestorage.app",
+  messagingSenderId: "235450732055",
+  appId: "1:235450732055:web:ce19a097b14fc27870d652"
+};
+
+// INIT
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// LOGIN FUNCTION
 async function login() {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value;
@@ -94,40 +94,32 @@ async function login() {
     return;
   }
 
-  const btn = document.querySelector("button");
-  btn.disabled = true;
-  btn.innerText = "Logging in...";
-
   try {
-    const res = await fetch(API_URL + "/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: user,
-        password: pass
-      })
-    });
+    const docRef = db.collection("users").doc(user);
+    const doc = await docRef.get();
 
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem("currentUser", user);
-      localStorage.setItem("sessionActive", "true");
-
-      window.location.href = "../homepage/index.html";
-    } else {
-      alert(data.message || "Wrong username or password");
+    if (!doc.exists) {
+      alert("User not found");
+      return;
     }
 
-  } catch (err) {
-    alert("Server not reachable");
-    console.log(err);
-  }
+    const data = doc.data();
 
-  btn.disabled = false;
-  btn.innerText = "Login";
+    if (data.password !== pass) {
+      alert("Wrong password");
+      return;
+    }
+
+    // SAVE SESSION
+    localStorage.setItem("currentUser", user);
+    localStorage.setItem("sessionActive", "true");
+
+    window.location.href = "../homepage/index.html";
+
+  } catch (err) {
+    console.log(err);
+    alert("Login error");
+  }
 }
 </script>
 
