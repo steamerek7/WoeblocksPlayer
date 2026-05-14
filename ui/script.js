@@ -1,18 +1,28 @@
 const CONFIG_URL =
 "https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
-// ---------------- GET SAVED VERSION ----------------
-function getLocalVersion() {
-  return localStorage.getItem("launcherVersion") || "1.0.0";
-}
-
-// ---------------- SAVE VERSION ----------------
-function setLocalVersion(v) {
-  localStorage.setItem("launcherVersion", v);
-}
-
-// ---------------- STATE ----------------
 let placeId = "0";
+
+// ---------------- VERSION STORAGE ----------------
+function getVersion() {
+  return localStorage.getItem("installedVersion") || "1.0.0";
+}
+
+function setVersion(v) {
+  localStorage.setItem("installedVersion", v);
+}
+
+// ---------------- UI UPDATE ----------------
+function renderUI(installedVersion, remoteData) {
+  // VERSION ON TOP OF TITLE (your request)
+  document.getElementById("title").innerText =
+    "WOEBLOCKS PLAYER | v" + installedVersion;
+
+  document.getElementById("news").innerText =
+    remoteData.message || "";
+
+  placeId = remoteData.robloxPlaceId || "0";
+}
 
 // ---------------- LOAD CONFIG ----------------
 async function loadConfig() {
@@ -23,28 +33,16 @@ async function loadConfig() {
 
     const data = await res.json();
 
-    const localVersion = getLocalVersion();
-    const remoteVersion = data.version;
+    const installedVersion = getVersion();
 
-    // UI reset
+    // render UI first
+    renderUI(installedVersion, data);
+
     const btn = document.getElementById("updateBtn");
     btn.style.display = "none";
-    document.getElementById("status").innerText = "";
 
-    // ALWAYS show current version
-    document.getElementById("status").innerText =
-      "Version: " + localVersion;
-
-    document.getElementById("news").innerText =
-      data.message || "";
-
-    document.getElementById("title").innerText =
-      "WOEBLOCKS PLAYER";
-
-    placeId = data.robloxPlaceId || "0";
-
-    // UPDATE CHECK
-    if (remoteVersion !== localVersion) {
+    // update check
+    if (data.version !== installedVersion) {
       btn.style.display = "inline-block";
     }
 
@@ -74,16 +72,15 @@ async function manualUpdate() {
     const res = await fetch(CONFIG_URL + "?t=" + Date.now());
     const data = await res.json();
 
-    // SAVE NEW VERSION (THIS IS THE FIX)
-    setLocalVersion(data.version);
+    // SAVE VERSION (THIS IS KEY FIX)
+    setVersion(data.version);
 
     document.getElementById("status").innerText =
-      "Updated to version " + data.version;
+      "Updated to v" + data.version;
 
-    // reload UI cleanly
     setTimeout(() => {
       window.location.reload();
-    }, 800);
+    }, 700);
 
   } catch (err) {
     console.log(err);
