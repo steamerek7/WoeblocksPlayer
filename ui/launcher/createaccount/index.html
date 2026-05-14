@@ -61,8 +61,6 @@ button {
   <input id="pass" type="password" placeholder="Password">
 
   <button onclick="create()">Create</button>
-
-  <p><a href="../login/index.html" style="color:#60a5fa">Back to login</a></p>
 </div>
 
 <script type="module">
@@ -88,15 +86,15 @@ window.create = async function () {
 
   const regex = /^[a-zA-Z0-9_]+$/;
 
-  if (user.length < 3 || user.length > 20) return alert("Username 3-20 chars");
-  if (!regex.test(user)) return alert("Only letters, numbers, _ allowed");
-  if ((user.match(/_/g) || []).length > 1) return alert("Only 1 underscore allowed");
-  if (pass.length < 8) return alert("Password must be 8+ chars");
+  if (user.length < 3 || user.length > 20) return alert("3-20 chars");
+  if (!regex.test(user)) return alert("Only letters, numbers, _");
+  if ((user.match(/_/g) || []).length > 1) return alert("Only 1 underscore");
+  if (pass.length < 8) return alert("Password 8+ chars");
 
   const userRef = ref(db, "users/" + user);
   const snap = await get(userRef);
 
-  if (snap.exists()) return alert("User already exists");
+  if (snap.exists()) return alert("User exists");
 
   await set(userRef, {
     username: user,
