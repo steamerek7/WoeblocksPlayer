@@ -10,6 +10,9 @@ function getVersion() {
 
 function setVersion(v) {
   localStorage.setItem("installedVersion", v);
+
+  // force sync marker (helps avoid stale UI)
+  sessionStorage.setItem("lastSync", Date.now());
 }
 
 // ---------------- LOAD CONFIG ----------------
@@ -26,7 +29,6 @@ async function loadConfig() {
 
     const installedVersion = getVersion();
 
-    // ================= UI =================
     const statusEl = document.getElementById("status");
     const titleEl = document.getElementById("title");
     const newsEl = document.getElementById("news");
@@ -34,19 +36,19 @@ async function loadConfig() {
 
     if (!statusEl || !titleEl || !newsEl || !btn) return;
 
+    // ---------------- UI UPDATE ----------------
     statusEl.innerText = "v" + installedVersion;
-
     titleEl.innerText = data.title || "NO TITLE FOUND";
     newsEl.innerText = data.message || "NO MESSAGE";
 
-    // ================= UPDATE BUTTON =================
+    // reset update button every refresh
     btn.style.display = "none";
 
     if (data.version && data.version !== installedVersion) {
       btn.style.display = "inline-block";
     }
 
-    // ================= PLAY FUNCTION =================
+    // ---------------- PLAY FUNCTION ----------------
     window.play = function () {
       const placeId = data.robloxPlaceId || "0";
 
@@ -63,13 +65,11 @@ async function loadConfig() {
     console.log("CONFIG ERROR:", err);
 
     const statusEl = document.getElementById("status");
-    if (statusEl) {
-      statusEl.innerText = "FAILED TO LOAD CONFIG";
-    }
+    if (statusEl) statusEl.innerText = "FAILED TO LOAD CONFIG";
   }
 }
 
-// ---------------- UPDATE ----------------
+// ---------------- UPDATE SYSTEM ----------------
 async function manualUpdate() {
   const btn = document.getElementById("updateBtn");
   const statusEl = document.getElementById("status");
@@ -86,24 +86,26 @@ async function manualUpdate() {
 
     console.log("UPDATE DATA:", data);
 
-    if (data.version) {
-      setVersion(data.version);
-
-      if (statusEl) {
-        statusEl.innerText = "Updated to v" + data.version;
-      }
+    if (!data.version) {
+      throw new Error("No version found in config");
     }
 
+    // ---------------- SAVE NEW VERSION ----------------
+    setVersion(data.version);
+
+    // ---------------- FORCE FULL REFRESH ----------------
     setTimeout(() => {
-      window.location.reload();
-    }, 700);
+      window.location.href =
+        window.location.origin +
+        window.location.pathname +
+        "?updated=" +
+        Date.now();
+    }, 600);
 
   } catch (err) {
     console.log(err);
 
-    if (statusEl) {
-      statusEl.innerText = "Update failed";
-    }
+    if (statusEl) statusEl.innerText = "Update failed";
   }
 }
 
