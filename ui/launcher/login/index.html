@@ -31,10 +31,13 @@ input {
   box-sizing: border-box;
   padding: 12px 14px;
   margin: 8px 0;
+
   border: none;
   border-radius: 8px;
+
   background: rgba(255,255,255,0.08);
   color: white;
+
   outline: none;
 }
 
@@ -42,12 +45,26 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
+
   border: none;
   border-radius: 8px;
+
   background: #3b82f6;
   color: white;
+
   cursor: pointer;
   font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+a {
+  color: #60a5fa;
+  font-size: 12px;
+  text-decoration: none;
 }
 </style>
 </head>
@@ -66,26 +83,30 @@ button {
 </div>
 
 <!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  get,
+  child
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-<script>
-// 🔥 YOUR CONFIG
+// 🔥 YOUR FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyA55tbdWKeAUIGBn4fyGqV90WU1UoIKVb0",
+  apiKey: "YOUR_KEY",
   authDomain: "woeblocks.firebaseapp.com",
+  databaseURL: "https://woeblocks-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "woeblocks",
-  storageBucket: "woeblocks.firebasestorage.app",
+  storageBucket: "woeblocks.appspot.com",
   messagingSenderId: "235450732055",
-  appId: "1:235450732055:web:ce19a097b14fc27870d652"
+  appId: "YOUR_APP_ID"
 };
 
-// INIT
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// LOGIN FUNCTION
-async function login() {
+window.login = async function () {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value;
 
@@ -94,23 +115,25 @@ async function login() {
     return;
   }
 
-  try {
-    const docRef = db.collection("users").doc(user);
-    const doc = await docRef.get();
+  const btn = document.querySelector("button");
+  btn.disabled = true;
+  btn.innerText = "Logging in...";
 
-    if (!doc.exists) {
-      alert("User not found");
+  try {
+    const snapshot = await get(child(ref(db), "users/" + user));
+
+    if (!snapshot.exists()) {
+      alert("User does not exist");
       return;
     }
 
-    const data = doc.data();
+    const data = snapshot.val();
 
     if (data.password !== pass) {
       alert("Wrong password");
       return;
     }
 
-    // SAVE SESSION
     localStorage.setItem("currentUser", user);
     localStorage.setItem("sessionActive", "true");
 
@@ -118,9 +141,12 @@ async function login() {
 
   } catch (err) {
     console.log(err);
-    alert("Login error");
+    alert("Server error");
   }
-}
+
+  btn.disabled = false;
+  btn.innerText = "Login";
+};
 </script>
 
 </body>
