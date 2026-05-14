@@ -1,6 +1,6 @@
 {
   "title": "Woeblocks Player",
-  "version": "1.0.2",
-  "message": "Added a fully custom login and account creation system. Along with it i made a custom backend so it saves accounts",
+  "version": "1.0.3",
+  "message": "Changed database to Firebase",
   "robloxPlaceId": "121268060261990"
 }
