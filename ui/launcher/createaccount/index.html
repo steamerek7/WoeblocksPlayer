@@ -23,6 +23,7 @@ body {
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
   text-align: center;
+  box-sizing: border-box;
 }
 
 input {
@@ -44,12 +45,20 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
+
   border: none;
   border-radius: 8px;
+
   background: #22c55e;
   color: white;
+
   cursor: pointer;
   font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 a {
@@ -74,11 +83,13 @@ a {
 </div>
 
 <script>
-function create() {
+const API_URL = "http://86.92.135.221:3000";
+
+async function create() {
     const user = document.getElementById("user").value.trim();
     const pass = document.getElementById("pass").value;
 
-    // ---------------- USERNAME RULES ----------------
+    // ---------------- VALIDATION ----------------
     const regex = /^[a-zA-Z0-9_]+$/;
 
     if (user.length < 3 || user.length > 20) {
@@ -91,33 +102,50 @@ function create() {
         return;
     }
 
-    const underscoreCount = (user.match(/_/g) || []).length;
-    if (underscoreCount > 1) {
+    if ((user.match(/_/g) || []).length > 1) {
         alert("Only 1 underscore allowed");
         return;
     }
 
-    // ---------------- PASSWORD RULES ----------------
     if (pass.length < 8) {
         alert("Password must be at least 8 characters");
         return;
     }
 
-    // ---------------- STORAGE ----------------
-    let users = JSON.parse(localStorage.getItem("users") || "{}");
+    const btn = document.querySelector("button");
+    btn.disabled = true;
+    btn.innerText = "Creating...";
 
-    if (users[user]) {
-        alert("User already exists");
-        return;
+    try {
+        const res = await fetch(API_URL + "/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: user,
+                password: pass
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            localStorage.setItem("currentUser", user);
+            localStorage.setItem("sessionActive", "true");
+
+            window.location.href = "../homepage/index.html";
+        } else {
+            alert(data.message || "Account creation failed");
+        }
+
+    } catch (err) {
+        alert("Server not reachable");
+        console.log(err);
     }
 
-    users[user] = pass;
-    localStorage.setItem("users", JSON.stringify(users));
-
-    // auto login
-    localStorage.setItem("currentUser", user);
-
-    window.location.href = "../homepage/index.html";
+    btn.disabled = false;
+    btn.innerText = "Create";
 }
 </script>
 
