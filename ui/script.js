@@ -1,7 +1,7 @@
 const VERSION = "1.0.0";
 
 const CONFIG_URL =
-"https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/refs/heads/main/version.json";
+"https://raw.githubusercontent.com/steamerek7/WoeblocksPlayer/main/version.json";
 
 // cache-free fetch helper
 async function fetchConfig() {
