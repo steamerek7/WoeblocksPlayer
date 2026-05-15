@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Page</title>
+<title>Woeblocks Game</title>
 
 <style>
 
@@ -19,102 +19,85 @@
 body{
     background:#121417;
     color:white;
+    overflow:hidden;
 }
 
 /* TOPBAR */
 
 .topbar{
+    position:absolute;
+    top:0;
+    left:0;
+
     width:100%;
     height:60px;
+
     background:#1b1d22;
     border-bottom:1px solid #2b2f36;
 
     display:flex;
     align-items:center;
+    justify-content:space-between;
 
     padding:0 20px;
+
+    z-index:10;
+}
+
+.left{
+    display:flex;
+    align-items:center;
+    gap:15px;
 }
 
 .back{
-    background:#2a2d34;
+    background:#2b2f36;
     border:none;
     color:white;
 
     padding:10px 18px;
 
     border-radius:10px;
-    cursor:pointer;
 
-    transition:0.2s;
+    cursor:pointer;
 }
 
 .back:hover{
-    background:#3b4048;
+    background:#3a3f47;
 }
 
-/* PAGE */
-
-.page{
-    max-width:1000px;
-    margin:auto;
-    padding:30px;
-}
-
-/* BANNER */
-
-.banner{
-    width:100%;
-    height:400px;
-
-    object-fit:cover;
-
-    border-radius:16px;
-
-    border:1px solid #2d3138;
-}
-
-/* INFO */
-
-.title{
-    margin-top:25px;
-    font-size:42px;
+.gameTitle{
+    font-size:22px;
     font-weight:bold;
 }
 
-.creator{
-    margin-top:10px;
-    color:#9ca3af;
-    font-size:18px;
+/* PLAY UI */
+
+.ui{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+
+    background:rgba(20,20,20,0.8);
+
+    border:1px solid #333;
+
+    padding:18px;
+
+    border-radius:14px;
+
+    z-index:10;
+
+    width:320px;
 }
 
-.description{
-    margin-top:20px;
-    color:#d1d5db;
-    line-height:1.7;
-    font-size:17px;
+.ui h2{
+    margin-bottom:10px;
 }
 
-/* PLAY */
-
-.play{
-    margin-top:30px;
-
-    background:#00b06f;
-    border:none;
-
-    padding:16px 35px;
-
-    border-radius:12px;
-
-    color:white;
-    font-size:18px;
-
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.play:hover{
-    background:#00c57c;
+.ui p{
+    color:#b8b8b8;
+    line-height:1.5;
 }
 
 </style>
@@ -126,33 +109,46 @@ body{
 
 <div class="topbar">
 
-    <button class="back" onclick="back()">
-        Back
-    </button>
+    <div class="left">
+
+        <button class="back" onclick="back()">
+            Back
+        </button>
+
+        <div class="gameTitle" id="title"></div>
+
+    </div>
 
 </div>
 
-<!-- PAGE -->
+<!-- INFO -->
 
-<div class="page">
+<div class="ui">
 
-    <img class="banner" id="gameImage">
+    <h2>Game Data</h2>
 
-    <div class="title" id="gameTitle"></div>
+    <p>
+        Loaded Parts:
+        <br><br>
 
-    <div class="creator" id="gameCreator"></div>
+        • Baseplate
+        <br>
 
-    <div class="description" id="gameDescription"></div>
+        • SpawnLocation
+        <br>
 
-    <button class="play">
-        Play
-    </button>
+        • Custom 3D Character
+    </p>
 
 </div>
+
+<!-- THREE.JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
-/* GET GAME */
+/* GAME */
 
 const game = JSON.parse(localStorage.getItem("selectedGame"));
 
@@ -162,15 +158,227 @@ if(!game){
 
 }
 
-/* LOAD */
+document.getElementById("title").innerText = game.title;
 
-document.getElementById("gameImage").src = game.image;
+/* SCENE */
 
-document.getElementById("gameTitle").innerText = game.title;
+const scene = new THREE.Scene();
 
-document.getElementById("gameCreator").innerText = "Made by " + game.creator;
+scene.background = new THREE.Color(0x87ceeb);
 
-document.getElementById("gameDescription").innerText = game.description;
+/* CAMERA */
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
+
+camera.position.set(0, 8, 15);
+
+/* RENDERER */
+
+const renderer = new THREE.WebGLRenderer({
+    antialias:true
+});
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+document.body.appendChild(renderer.domElement);
+
+/* LIGHT */
+
+const light = new THREE.DirectionalLight(0xffffff, 1);
+
+light.position.set(10,20,10);
+
+scene.add(light);
+
+scene.add(new THREE.AmbientLight(0xffffff,0.5));
+
+/* BASEPLATE */
+
+const baseplateGeometry = new THREE.BoxGeometry(
+    60,
+    1,
+    60
+);
+
+const baseplateMaterial = new THREE.MeshStandardMaterial({
+    color:0x4a7a42
+});
+
+const baseplate = new THREE.Mesh(
+    baseplateGeometry,
+    baseplateMaterial
+);
+
+baseplate.position.y = -0.5;
+
+scene.add(baseplate);
+
+/* SPAWN LOCATION */
+
+const spawnGeometry = new THREE.BoxGeometry(
+    6,
+    1,
+    6
+);
+
+const spawnMaterial = new THREE.MeshStandardMaterial({
+    color:0x3b82f6
+});
+
+const spawn = new THREE.Mesh(
+    spawnGeometry,
+    spawnMaterial
+);
+
+spawn.position.set(0,0.1,0);
+
+scene.add(spawn);
+
+/* CUSTOM CHARACTER */
+
+/* BODY */
+
+const body = new THREE.Mesh(
+
+    new THREE.BoxGeometry(2,3,1),
+
+    new THREE.MeshStandardMaterial({
+        color:0x2563eb
+    })
+
+);
+
+body.position.y = 3;
+
+scene.add(body);
+
+/* HEAD */
+
+const head = new THREE.Mesh(
+
+    new THREE.BoxGeometry(1.8,1.8,1.8),
+
+    new THREE.MeshStandardMaterial({
+        color:0xffd6b3
+    })
+
+);
+
+head.position.y = 5.5;
+
+scene.add(head);
+
+/* LEFT ARM */
+
+const leftArm = new THREE.Mesh(
+
+    new THREE.BoxGeometry(0.7,2.5,0.7),
+
+    new THREE.MeshStandardMaterial({
+        color:0xffd6b3
+    })
+
+);
+
+leftArm.position.set(-1.5,3,0);
+
+scene.add(leftArm);
+
+/* RIGHT ARM */
+
+const rightArm = new THREE.Mesh(
+
+    new THREE.BoxGeometry(0.7,2.5,0.7),
+
+    new THREE.MeshStandardMaterial({
+        color:0xffd6b3
+    })
+
+);
+
+rightArm.position.set(1.5,3,0);
+
+scene.add(rightArm);
+
+/* LEFT LEG */
+
+const leftLeg = new THREE.Mesh(
+
+    new THREE.BoxGeometry(0.8,2.5,0.8),
+
+    new THREE.MeshStandardMaterial({
+        color:0x1f2937
+    })
+
+);
+
+leftLeg.position.set(-0.5,0.8,0);
+
+scene.add(leftLeg);
+
+/* RIGHT LEG */
+
+const rightLeg = new THREE.Mesh(
+
+    new THREE.BoxGeometry(0.8,2.5,0.8),
+
+    new THREE.MeshStandardMaterial({
+        color:0x1f2937
+    })
+
+);
+
+rightLeg.position.set(0.5,0.8,0);
+
+scene.add(rightLeg);
+
+/* ANIMATION */
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    body.rotation.y += 0.003;
+
+    head.rotation.y += 0.003;
+
+    leftArm.rotation.y += 0.003;
+
+    rightArm.rotation.y += 0.003;
+
+    leftLeg.rotation.y += 0.003;
+
+    rightLeg.rotation.y += 0.003;
+
+    renderer.render(scene,camera);
+
+}
+
+animate();
+
+/* RESIZE */
+
+window.addEventListener("resize", () => {
+
+    camera.aspect =
+        window.innerWidth / window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+});
 
 /* BACK */
 
