@@ -1,11 +1,12 @@
-<!-- GAMEPAGE.HTML -->
+# Woeblocks 3D Game Engine
 
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woeblocks Game</title>
+<title>Woeblocks Engine</title>
 
 <style>
 
@@ -17,9 +18,12 @@
 }
 
 body{
-    background:#121417;
-    color:white;
     overflow:hidden;
+    background:#111317;
+}
+
+canvas{
+    display:block;
 }
 
 /* TOPBAR */
@@ -33,7 +37,7 @@ body{
     height:60px;
 
     background:#1b1d22;
-    border-bottom:1px solid #2b2f36;
+    border-bottom:1px solid #2f333c;
 
     display:flex;
     align-items:center;
@@ -41,63 +45,48 @@ body{
 
     padding:0 20px;
 
-    z-index:10;
+    z-index:100;
 }
 
-.left{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.back{
-    background:#2b2f36;
-    border:none;
+.logo{
     color:white;
-
-    padding:10px 18px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-}
-
-.back:hover{
-    background:#3a3f47;
-}
-
-.gameTitle{
-    font-size:22px;
+    font-size:24px;
     font-weight:bold;
 }
 
-/* PLAY UI */
+.info{
+    color:#aaa;
+    font-size:14px;
+}
 
-.ui{
+/* GAME INFO */
+
+.panel{
     position:absolute;
-    bottom:20px;
     left:20px;
+    bottom:20px;
 
-    background:rgba(20,20,20,0.8);
+    width:300px;
 
-    border:1px solid #333;
+    background:rgba(20,20,20,0.85);
+    border:1px solid #333842;
 
     padding:18px;
 
     border-radius:14px;
 
-    z-index:10;
+    z-index:100;
 
-    width:320px;
+    color:white;
 }
 
-.ui h2{
-    margin-bottom:10px;
+.panel h2{
+    margin-bottom:12px;
 }
 
-.ui p{
-    color:#b8b8b8;
-    line-height:1.5;
+.panel p{
+    color:#c5c5c5;
+    line-height:1.6;
 }
 
 </style>
@@ -105,65 +94,43 @@ body{
 
 <body>
 
-<!-- TOPBAR -->
-
 <div class="topbar">
 
-    <div class="left">
+    <div class="logo">
+        Woeblocks Engine
+    </div>
 
-        <button class="back" onclick="back()">
-            Back
-        </button>
-
-        <div class="gameTitle" id="title"></div>
-
+    <div class="info">
+        WASD = Move | Mouse = Camera
     </div>
 
 </div>
 
-<!-- INFO -->
+<div class="panel">
 
-<div class="ui">
-
-    <h2>Game Data</h2>
+    <h2>Loaded Objects</h2>
 
     <p>
-        Loaded Parts:
-        <br><br>
-
         • Baseplate
         <br>
-
         • SpawnLocation
         <br>
-
-        • Custom 3D Character
+        • Playable Character
+        <br>
+        • Camera System
+        <br>
+        • Movement System
     </p>
 
 </div>
-
-<!-- THREE.JS -->
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
-/* GAME */
-
-const game = JSON.parse(localStorage.getItem("selectedGame"));
-
-if(!game){
-
-    window.location.href = "index.html";
-
-}
-
-document.getElementById("title").innerText = game.title;
-
 /* SCENE */
 
 const scene = new THREE.Scene();
-
 scene.background = new THREE.Color(0x87ceeb);
 
 /* CAMERA */
@@ -175,7 +142,7 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-camera.position.set(0, 8, 15);
+camera.position.set(0,6,12);
 
 /* RENDERER */
 
@@ -188,65 +155,81 @@ renderer.setSize(
     window.innerHeight
 );
 
+renderer.shadowMap.enabled = true;
+
+renderer.domElement.style.position = "absolute";
+renderer.domElement.style.top = "0";
+renderer.domElement.style.left = "0";
+
 document.body.appendChild(renderer.domElement);
 
-/* LIGHT */
+/* LIGHTING */
 
-const light = new THREE.DirectionalLight(0xffffff, 1);
+const ambient = new THREE.AmbientLight(0xffffff,0.6);
+scene.add(ambient);
 
-light.position.set(10,20,10);
+const sun = new THREE.DirectionalLight(0xffffff,1);
 
-scene.add(light);
+sun.position.set(10,20,10);
 
-scene.add(new THREE.AmbientLight(0xffffff,0.5));
+sun.castShadow = true;
+
+scene.add(sun);
 
 /* BASEPLATE */
 
-const baseplateGeometry = new THREE.BoxGeometry(
-    60,
-    1,
-    60
-);
-
-const baseplateMaterial = new THREE.MeshStandardMaterial({
-    color:0x4a7a42
-});
-
 const baseplate = new THREE.Mesh(
-    baseplateGeometry,
-    baseplateMaterial
+
+    new THREE.BoxGeometry(120,1,120),
+
+    new THREE.MeshStandardMaterial({
+        color:0x4b7f3f
+    })
+
 );
 
 baseplate.position.y = -0.5;
 
+baseplate.receiveShadow = true;
+
 scene.add(baseplate);
 
-/* SPAWN LOCATION */
+/* GRID */
 
-const spawnGeometry = new THREE.BoxGeometry(
-    6,
-    1,
-    6
-);
+const grid = new THREE.GridHelper(120,120,0x000000,0x000000);
 
-const spawnMaterial = new THREE.MeshStandardMaterial({
-    color:0x3b82f6
-});
+grid.material.opacity = 0.2;
+grid.material.transparent = true;
+
+scene.add(grid);
+
+/* SPAWN */
 
 const spawn = new THREE.Mesh(
-    spawnGeometry,
-    spawnMaterial
+
+    new THREE.BoxGeometry(6,1,6),
+
+    new THREE.MeshStandardMaterial({
+        color:0x2d7fff,
+        emissive:0x1d4ed8,
+        emissiveIntensity:0.4
+    })
+
 );
 
 spawn.position.set(0,0.1,0);
 
+spawn.receiveShadow = true;
+
 scene.add(spawn);
 
-/* CUSTOM CHARACTER */
+/* CHARACTER */
+
+const character = new THREE.Group();
 
 /* BODY */
 
-const body = new THREE.Mesh(
+const torso = new THREE.Mesh(
 
     new THREE.BoxGeometry(2,3,1),
 
@@ -256,57 +239,63 @@ const body = new THREE.Mesh(
 
 );
 
-body.position.y = 3;
+torso.position.y = 4;
 
-scene.add(body);
+torso.castShadow = true;
+
+character.add(torso);
 
 /* HEAD */
 
 const head = new THREE.Mesh(
 
-    new THREE.BoxGeometry(1.8,1.8,1.8),
+    new THREE.BoxGeometry(1.7,1.7,1.7),
 
     new THREE.MeshStandardMaterial({
-        color:0xffd6b3
+        color:0xffd7b5
     })
 
 );
 
-head.position.y = 5.5;
+head.position.y = 6.4;
 
-scene.add(head);
+head.castShadow = true;
+
+character.add(head);
 
 /* LEFT ARM */
 
 const leftArm = new THREE.Mesh(
 
-    new THREE.BoxGeometry(0.7,2.5,0.7),
+    new THREE.BoxGeometry(0.7,2.4,0.7),
 
     new THREE.MeshStandardMaterial({
-        color:0xffd6b3
+        color:0xffd7b5
     })
 
 );
 
-leftArm.position.set(-1.5,3,0);
+leftArm.position.set(-1.5,4,0);
+leftArm.castShadow = true;
 
-scene.add(leftArm);
+character.add(leftArm);
 
 /* RIGHT ARM */
 
 const rightArm = new THREE.Mesh(
 
-    new THREE.BoxGeometry(0.7,2.5,0.7),
+    new THREE.BoxGeometry(0.7,2.4,0.7),
 
     new THREE.MeshStandardMaterial({
-        color:0xffd6b3
+        color:0xffd7b5
     })
 
 );
 
-rightArm.position.set(1.5,3,0);
+rightArm.position.set(1.5,4,0);
+rightArm.castShadow = true;
 
-scene.add(rightArm);
+character.add(rightArm);
 
 /* LEFT LEG */
 
@@ -320,9 +309,10 @@ const leftLeg = new THREE.Mesh(
 
 );
 
-leftLeg.position.set(-0.5,0.8,0);
+leftLeg.position.set(-0.5,1.8,0);
+leftLeg.castShadow = true;
 
-scene.add(leftLeg);
+character.add(leftLeg);
 
 /* RIGHT LEG */
 
@@ -336,27 +326,95 @@ const rightLeg = new THREE.Mesh(
 
 );
 
-rightLeg.position.set(0.5,0.8,0);
+rightLeg.position.set(0.5,1.8,0);
+rightLeg.castShadow = true;
 
-scene.add(rightLeg);
+character.add(rightLeg);
 
-/* ANIMATION */
+scene.add(character);
+
+/* MOVEMENT */
+
+const keys = {};
+
+window.addEventListener("keydown", (e)=>{
+    keys[e.key.toLowerCase()] = true;
+});
+
+window.addEventListener("keyup", (e)=>{
+    keys[e.key.toLowerCase()] = false;
+});
+
+/* CAMERA FOLLOW */
+
+function updateCamera(){
+
+    camera.position.x = character.position.x;
+    camera.position.z = character.position.z + 12;
+
+    camera.lookAt(
+        character.position.x,
+        4,
+        character.position.z
+    );
+
+}
+
+/* ANIMATE */
 
 function animate(){
 
     requestAnimationFrame(animate);
 
-    body.rotation.y += 0.003;
+    const speed = 0.15;
 
-    head.rotation.y += 0.003;
+    let moving = false;
 
-    leftArm.rotation.y += 0.003;
+    if(keys["w"]){
+        character.position.z -= speed;
+        character.rotation.y = 0;
+        moving = true;
+    }
 
-    rightArm.rotation.y += 0.003;
+    if(keys["s"]){
+        character.position.z += speed;
+        character.rotation.y = Math.PI;
+        moving = true;
+    }
 
-    leftLeg.rotation.y += 0.003;
+    if(keys["a"]){
+        character.position.x -= speed;
+        character.rotation.y = Math.PI / 2;
+        moving = true;
+    }
 
-    rightLeg.rotation.y += 0.003;
+    if(keys["d"]){
+        character.position.x += speed;
+        character.rotation.y = -Math.PI / 2;
+        moving = true;
+    }
+
+    /* WALK ANIMATION */
+
+    if(moving){
+
+        leftArm.rotation.x = Math.sin(Date.now() * 0.01) * 0.7;
+        rightArm.rotation.x = -Math.sin(Date.now() * 0.01) * 0.7;
+
+        leftLeg.rotation.x = -Math.sin(Date.now() * 0.01) * 0.7;
+        rightLeg.rotation.x = Math.sin(Date.now() * 0.01) * 0.7;
+
+    }else{
+
+        leftArm.rotation.x = 0;
+        rightArm.rotation.x = 0;
+
+        leftLeg.rotation.x = 0;
+        rightLeg.rotation.x = 0;
+
+    }
+
+    updateCamera();
 
     renderer.render(scene,camera);
 
@@ -366,10 +424,9 @@ animate();
 
 /* RESIZE */
 
-window.addEventListener("resize", () => {
+window.addEventListener("resize", ()=>{
 
-    camera.aspect =
-        window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;
 
     camera.updateProjectionMatrix();
 
@@ -380,15 +437,8 @@ window.addEventListener("resize", () => {
 
 });
 
-/* BACK */
-
-function back(){
-
-    window.location.href = "index.html";
-
-}
-
 </script>
 
 </body>
 </html>
+```
