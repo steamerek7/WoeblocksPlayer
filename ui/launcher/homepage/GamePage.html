@@ -1,0 +1,186 @@
+<!-- GAMEPAGE.HTML -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Page</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#121417;
+    color:white;
+}
+
+/* TOPBAR */
+
+.topbar{
+    width:100%;
+    height:60px;
+    background:#1b1d22;
+    border-bottom:1px solid #2b2f36;
+
+    display:flex;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.back{
+    background:#2a2d34;
+    border:none;
+    color:white;
+
+    padding:10px 18px;
+
+    border-radius:10px;
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.back:hover{
+    background:#3b4048;
+}
+
+/* PAGE */
+
+.page{
+    max-width:1000px;
+    margin:auto;
+    padding:30px;
+}
+
+/* BANNER */
+
+.banner{
+    width:100%;
+    height:400px;
+
+    object-fit:cover;
+
+    border-radius:16px;
+
+    border:1px solid #2d3138;
+}
+
+/* INFO */
+
+.title{
+    margin-top:25px;
+    font-size:42px;
+    font-weight:bold;
+}
+
+.creator{
+    margin-top:10px;
+    color:#9ca3af;
+    font-size:18px;
+}
+
+.description{
+    margin-top:20px;
+    color:#d1d5db;
+    line-height:1.7;
+    font-size:17px;
+}
+
+/* PLAY */
+
+.play{
+    margin-top:30px;
+
+    background:#00b06f;
+    border:none;
+
+    padding:16px 35px;
+
+    border-radius:12px;
+
+    color:white;
+    font-size:18px;
+
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.play:hover{
+    background:#00c57c;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+    <button class="back" onclick="back()">
+        Back
+    </button>
+
+</div>
+
+<!-- PAGE -->
+
+<div class="page">
+
+    <img class="banner" id="gameImage">
+
+    <div class="title" id="gameTitle"></div>
+
+    <div class="creator" id="gameCreator"></div>
+
+    <div class="description" id="gameDescription"></div>
+
+    <button class="play">
+        Play
+    </button>
+
+</div>
+
+<script>
+
+/* GET GAME */
+
+const game = JSON.parse(localStorage.getItem("selectedGame"));
+
+if(!game){
+
+    window.location.href = "index.html";
+
+}
+
+/* LOAD */
+
+document.getElementById("gameImage").src = game.image;
+
+document.getElementById("gameTitle").innerText = game.title;
+
+document.getElementById("gameCreator").innerText = "Made by " + game.creator;
+
+document.getElementById("gameDescription").innerText = game.description;
+
+/* BACK */
+
+function back(){
+
+    window.location.href = "index.html";
+
+}
+
+</script>
+
+</body>
+</html>
