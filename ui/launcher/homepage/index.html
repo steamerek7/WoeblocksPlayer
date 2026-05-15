@@ -1,3 +1,5 @@
+<!-- INDEX.HTML -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +8,7 @@
 <title>Woeblocks</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -24,11 +27,13 @@ body{
     width:100%;
     height:60px;
     background:#1b1d22;
+    border-bottom:1px solid #2c2f36;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     padding:0 20px;
-    border-bottom:1px solid #2c2f36;
 }
 
 .logo{
@@ -36,49 +41,57 @@ body{
     font-weight:bold;
 }
 
-.rightSide{
+.right{
     display:flex;
     align-items:center;
     gap:15px;
 }
 
 .username{
-    color:#bdbdbd;
+    color:#aaa;
     font-size:14px;
 }
 
-/* COG */
+/* SETTINGS */
 
-.cog{
-    width:42px;
-    height:42px;
+.settingsBtn{
+    width:40px;
+    height:40px;
     border-radius:10px;
     background:#2a2d34;
+    border:none;
+    cursor:pointer;
+    transition:0.2s;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    cursor:pointer;
-    transition:0.2s;
-    font-size:20px;
 }
 
-.cog:hover{
-    background:#3b3f47;
+.settingsBtn:hover{
+    background:#3a3e47;
 }
 
-/* DROPDOWN */
+.settingsBtn img{
+    width:22px;
+}
+
+/* MENU */
 
 .menu{
     position:absolute;
     top:70px;
     right:20px;
+
     width:220px;
-    background:#1e2127;
-    border:1px solid #333842;
+
+    background:#1d2026;
+    border:1px solid #32353d;
     border-radius:12px;
+
     overflow:hidden;
+
     display:none;
-    box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 .menu button{
@@ -86,18 +99,18 @@ body{
     background:none;
     border:none;
     color:white;
-    padding:16px;
+    padding:15px;
     text-align:left;
     cursor:pointer;
-    font-size:15px;
     transition:0.15s;
+    font-size:15px;
 }
 
 .menu button:hover{
-    background:#2b2f37;
+    background:#2a2d35;
 }
 
-.logoutBtn{
+.logout{
     color:#ff6b6b !important;
 }
 
@@ -107,67 +120,58 @@ body{
     padding:30px;
 }
 
-/* GAME PAGE */
+/* GAME GRID */
 
-.gameCard{
-    width:100%;
-    max-width:900px;
+.games{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:20px;
+}
+
+/* GAME CARD */
+
+.game{
     background:#1b1d22;
-    border-radius:16px;
+    border:1px solid #2b2f36;
+    border-radius:14px;
     overflow:hidden;
-    border:1px solid #2d3138;
-}
-
-.gameBanner{
-    width:100%;
-    height:300px;
-    background:url('https://tr.rbxcdn.com/180DAY-7f8e1d3a8f0e6d93e58c7e4b91a77f9f/768/432/Image/Webp/noFilter') center/cover;
-}
-
-.gameInfo{
-    padding:25px;
-}
-
-.gameTitle{
-    font-size:32px;
-    font-weight:bold;
-    margin-bottom:10px;
-}
-
-.gameDesc{
-    color:#b0b0b0;
-    line-height:1.6;
-    margin-bottom:20px;
-}
-
-.playBtn{
-    background:#00b06f;
-    border:none;
-    padding:14px 30px;
-    color:white;
-    border-radius:10px;
-    font-size:18px;
     cursor:pointer;
     transition:0.2s;
 }
 
-.playBtn:hover{
-    background:#00c77d;
+.game:hover{
+    transform:translateY(-3px);
+    border-color:#444b57;
 }
 
-/* MOBILE */
-
-@media(max-width:700px){
-
-    .gameBanner{
-        height:200px;
-    }
-
-    .gameTitle{
-        font-size:24px;
-    }
-
+.game img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
 }
+
+.gameInfo{
+    padding:15px;
+}
+
+.gameTitle{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.gameCreator{
+    color:#9ca3af;
+    margin-bottom:10px;
+    font-size:14px;
+}
+
+.gameDesc{
+    color:#c2c2c2;
+    font-size:14px;
+    line-height:1.5;
+}
+
 </style>
 </head>
 
@@ -177,34 +181,40 @@ body{
 
 <div class="topbar">
 
-    <div class="logo">Woeblocks</div>
+    <div class="logo">
+        Woeblocks
+    </div>
 
-    <div class="rightSide">
+    <div class="right">
 
         <div class="username" id="userBox"></div>
 
-        <div class="cog" onclick="toggleMenu()">
-            ⚙️
-        </div>
+        <button class="settingsBtn" onclick="toggleMenu()">
+
+            <!-- COG SVG -->
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png">
+
+        </button>
 
     </div>
 
 </div>
 
-<!-- DROPDOWN MENU -->
+<!-- MENU -->
 
 <div class="menu" id="menu">
 
-    <button onclick="openSettings()">
-        ⚙️ Settings
+    <button onclick="settings()">
+        Settings
     </button>
 
-    <button onclick="openSafety()">
-        🛡️ Help & Safety
+    <button onclick="safety()">
+        Help & Safety
     </button>
 
-    <button class="logoutBtn" onclick="logout()">
-        🚪 Log out
+    <button class="logout" onclick="logout()">
+        Log out
     </button>
 
 </div>
@@ -213,80 +223,69 @@ body{
 
 <div class="main">
 
-    <div class="gameCard">
-
-        <div class="gameBanner"></div>
-
-        <div class="gameInfo">
-
-            <div class="gameTitle">
-                Lost & Alone
-            </div>
-
-            <div class="gameDesc">
-                Survive in a massive open world. 
-                Gather resources, build shelter, explore caves,
-                fight wildlife, and stay alive through storms,
-                hunger, cold, and darkness.
-            </div>
-
-            <button class="playBtn">
-                ▶ Play
-            </button>
-
-        </div>
-
-    </div>
+    <div class="games" id="games"></div>
 
 </div>
 
 <script>
 
-/* USER SYSTEM */
+/* LOGIN */
 
 const user = localStorage.getItem("currentUser");
 
 if(!user){
+
     window.location.href = "../login/index.html";
+
 }else{
+
     document.getElementById("userBox").innerText = user;
+
 }
 
-/* MENU */
+/* SETTINGS MENU */
 
 const menu = document.getElementById("menu");
 
 function toggleMenu(){
 
     if(menu.style.display === "block"){
+
         menu.style.display = "none";
+
     }else{
+
         menu.style.display = "block";
+
     }
 
 }
-
-/* CLOSE MENU IF CLICK OUTSIDE */
 
 window.addEventListener("click", function(e){
 
     if(
         !e.target.closest(".menu") &&
-        !e.target.closest(".cog")
+        !e.target.closest(".settingsBtn")
     ){
+
         menu.style.display = "none";
+
     }
 
 });
 
 /* BUTTONS */
 
-function openSettings(){
-    alert("Settings page coming soon.");
+function settings(){
+
+    alert("Settings page soon.");
+
 }
 
-function openSafety(){
-    alert("Help & Safety page coming soon.");
+function safety(){
+
+    alert("Help & Safety page soon.");
+
 }
 
 function logout(){
@@ -295,6 +294,70 @@ function logout(){
     window.location.href = "../login/index.html";
 
 }
+
+/* GAMES */
+
+const games = [
+
+    {
+        title: "Lost & Alone",
+        creator: "Wojtas",
+        description: "Survive in a massive open world filled with storms, wildlife and danger.",
+        image: "https://tr.rbxcdn.com/180DAY-7f8e1d3a8f0e6d93e58c7e4b91a77f9f/768/432/Image/Webp/noFilter"
+    },
+
+    {
+        title: "Sword Simulator",
+        creator: "Wojtas",
+        description: "Swing your sword, gain power and unlock stronger worlds.",
+        image: "https://images.rbxcdn.com/076d146437ffc79cebc36bf2ded91196.png"
+    }
+
+];
+
+/* LOAD GAMES */
+
+const gamesContainer = document.getElementById("games");
+
+games.forEach(game => {
+
+    const div = document.createElement("div");
+
+    div.className = "game";
+
+    div.innerHTML = `
+
+        <img src="${game.image}">
+
+        <div class="gameInfo">
+
+            <div class="gameTitle">
+                ${game.title}
+            </div>
+
+            <div class="gameCreator">
+                Made by ${game.creator}
+            </div>
+
+            <div class="gameDesc">
+                ${game.description}
+            </div>
+
+        </div>
+
+    `;
+
+    div.onclick = function(){
+
+        localStorage.setItem("selectedGame", JSON.stringify(game));
+
+        window.location.href = "GamePage.html";
+
+    };
+
+    gamesContainer.appendChild(div);
+
+});
 
 </script>
 
