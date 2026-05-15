@@ -1,12 +1,13 @@
-# Woeblocks 3D Game Engine
+<!-- ========================= -->
+<!-- GAMEPAGE.HTML             -->
+<!-- ========================= -->
 
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woeblocks Engine</title>
+<title>Woeblocks</title>
 
 <style>
 
@@ -22,10 +23,6 @@ body{
     background:#111317;
 }
 
-canvas{
-    display:block;
-}
-
 /* TOPBAR */
 
 .topbar{
@@ -37,7 +34,7 @@ canvas{
     height:60px;
 
     background:#1b1d22;
-    border-bottom:1px solid #2f333c;
+    border-bottom:1px solid #2d3138;
 
     display:flex;
     align-items:center;
@@ -54,39 +51,81 @@ canvas{
     font-weight:bold;
 }
 
-.info{
-    color:#aaa;
+.right{
+    color:#bdbdbd;
     font-size:14px;
 }
 
-/* GAME INFO */
+/* HEALTH */
 
-.panel{
+.healthContainer{
     position:absolute;
-    left:20px;
-    bottom:20px;
+    top:80px;
+    right:20px;
 
-    width:300px;
+    width:260px;
+    height:26px;
+
+    background:#2b2b2b;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+    border:2px solid #3d4148;
+
+    z-index:100;
+}
+
+.healthBar{
+    width:100%;
+    height:100%;
+
+    background:
+    linear-gradient(
+        to right,
+        #00ff88,
+        #00c96b
+    );
+
+    border-radius:999px;
+
+    transition:0.2s;
+}
+
+/* INFO */
+
+.info{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+
+    width:320px;
 
     background:rgba(20,20,20,0.85);
+
     border:1px solid #333842;
 
-    padding:18px;
+    border-radius:16px;
 
-    border-radius:14px;
+    padding:18px;
 
     z-index:100;
 
     color:white;
 }
 
-.panel h2{
+.info h2{
     margin-bottom:12px;
 }
 
-.panel p{
-    color:#c5c5c5;
+.info p{
+    color:#c6c6c6;
     line-height:1.6;
+}
+
+canvas{
+    display:block;
 }
 
 </style>
@@ -94,96 +133,178 @@ canvas{
 
 <body>
 
+<!-- TOPBAR -->
+
 <div class="topbar">
 
     <div class="logo">
-        Woeblocks Engine
+        Woeblocks
     </div>
 
-    <div class="info">
+    <div class="right">
         WASD = Move | Mouse = Camera
     </div>
 
 </div>
 
-<div class="panel">
+<!-- HEALTH -->
 
-    <h2>Loaded Objects</h2>
+<div class="healthContainer">
 
-    <p>
-        • Baseplate
-        <br>
-        • SpawnLocation
-        <br>
-        • Playable Character
-        <br>
-        • Camera System
-        <br>
-        • Movement System
-    </p>
+    <div class="healthBar" id="healthBar"></div>
 
 </div>
 
+<!-- INFO -->
+
+<div class="info">
+
+    <h2 id="gameTitle"></h2>
+
+    <p id="gameDescription"></p>
+
+</div>
+
+<!-- THREEJS -->
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+<!-- CHARACTER -->
+
+<script src="Character.js"></script>
 
 <script>
 
-/* SCENE */
+/* ========================= */
+/* LOAD GAME INFO            */
+/* ========================= */
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
-
-/* CAMERA */
-
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
+const game =
+JSON.parse(
+    localStorage.getItem("selectedGame")
 );
 
-camera.position.set(0,6,12);
+document.getElementById("gameTitle")
+.innerText = game.title;
 
-/* RENDERER */
+document.getElementById("gameDescription")
+.innerText = game.description;
 
-const renderer = new THREE.WebGLRenderer({
+/* ========================= */
+/* SCENE                     */
+/* ========================= */
+
+const scene = new THREE.Scene();
+
+scene.background =
+new THREE.Color(0x87ceeb);
+
+/* ========================= */
+/* CAMERA                    */
+/* ========================= */
+
+const camera =
+new THREE.PerspectiveCamera(
+
+    75,
+
+    window.innerWidth /
+    window.innerHeight,
+
+    0.1,
+
+    1000
+
+);
+
+camera.position.set(0,8,12);
+
+/* ========================= */
+/* RENDERER                  */
+/* ========================= */
+
+const renderer =
+new THREE.WebGLRenderer({
+
     antialias:true
+
 });
 
 renderer.setSize(
+
     window.innerWidth,
     window.innerHeight
+
 );
 
 renderer.shadowMap.enabled = true;
 
-renderer.domElement.style.position = "absolute";
-renderer.domElement.style.top = "0";
-renderer.domElement.style.left = "0";
+renderer.shadowMap.type =
+THREE.PCFSoftShadowMap;
 
-document.body.appendChild(renderer.domElement);
+document.body.appendChild(
+    renderer.domElement
+);
 
-/* LIGHTING */
+/* ========================= */
+/* LIGHTING                  */
+/* ========================= */
 
-const ambient = new THREE.AmbientLight(0xffffff,0.6);
+const ambient =
+new THREE.AmbientLight(
+    0xffffff,
+    0.6
+);
+
 scene.add(ambient);
 
-const sun = new THREE.DirectionalLight(0xffffff,1);
+const sun =
+new THREE.DirectionalLight(
+    0xffffff,
+    1
+);
 
-sun.position.set(10,20,10);
+sun.position.set(20,30,20);
 
 sun.castShadow = true;
 
 scene.add(sun);
 
-/* BASEPLATE */
+/* ========================= */
+/* TEXTURES                  */
+/* ========================= */
 
-const baseplate = new THREE.Mesh(
+const loader =
+new THREE.TextureLoader();
 
-    new THREE.BoxGeometry(120,1,120),
+const studTexture =
+loader.load(
+"https://i.imgur.com/8yKQF8x.png"
+);
+
+studTexture.wrapS =
+THREE.RepeatWrapping;
+
+studTexture.wrapT =
+THREE.RepeatWrapping;
+
+studTexture.repeat.set(8,8);
+
+/* ========================= */
+/* BASEPLATE                 */
+/* ========================= */
+
+const baseplate =
+new THREE.Mesh(
+
+    new THREE.BoxGeometry(
+        120,
+        1,
+        120
+    ),
 
     new THREE.MeshStandardMaterial({
-        color:0x4b7f3f
+        map:studTexture
     })
 
 );
@@ -192,27 +313,33 @@ baseplate.position.y = -0.5;
 
 baseplate.receiveShadow = true;
 
+baseplate.userData = {
+    anchored:true
+};
+
 scene.add(baseplate);
 
-/* GRID */
+/* ========================= */
+/* SPAWNLOCATION             */
+/* ========================= */
 
-const grid = new THREE.GridHelper(120,120,0x000000,0x000000);
+const spawn =
+new THREE.Mesh(
 
-grid.material.opacity = 0.2;
-grid.material.transparent = true;
-
-scene.add(grid);
-
-/* SPAWN */
-
-const spawn = new THREE.Mesh(
-
-    new THREE.BoxGeometry(6,1,6),
+    new THREE.BoxGeometry(
+        6,
+        1,
+        6
+    ),
 
     new THREE.MeshStandardMaterial({
-        color:0x2d7fff,
-        emissive:0x1d4ed8,
+
+        color:0x3b82f6,
+
+        emissive:0x2563eb,
+
         emissiveIntensity:0.4
+
     })
 
 );
@@ -221,219 +348,354 @@ spawn.position.set(0,0.1,0);
 
 spawn.receiveShadow = true;
 
+spawn.userData = {
+    anchored:true
+};
+
 scene.add(spawn);
 
-/* CHARACTER */
+/* ========================= */
+/* TEST PUSHABLE PART        */
+/* ========================= */
 
-const character = new THREE.Group();
+const pushBox =
+new THREE.Mesh(
 
-/* BODY */
-
-const torso = new THREE.Mesh(
-
-    new THREE.BoxGeometry(2,3,1),
+    new THREE.BoxGeometry(
+        4,
+        4,
+        4
+    ),
 
     new THREE.MeshStandardMaterial({
-        color:0x2563eb
+        map:studTexture
     })
 
 );
 
-torso.position.y = 4;
+pushBox.position.set(10,2,0);
 
-torso.castShadow = true;
+pushBox.castShadow = true;
 
-character.add(torso);
+pushBox.userData = {
 
-/* HEAD */
+    anchored:false,
 
-const head = new THREE.Mesh(
+    velocity:
+    new THREE.Vector3()
 
-    new THREE.BoxGeometry(1.7,1.7,1.7),
+};
 
-    new THREE.MeshStandardMaterial({
-        color:0xffd7b5
-    })
+scene.add(pushBox);
 
+/* ========================= */
+/* PLAYER                    */
+/* ========================= */
+
+const player =
+createCharacter();
+
+scene.add(player);
+
+/* ========================= */
+/* HEALTH                    */
+/* ========================= */
+
+let health = 100;
+
+const healthBar =
+document.getElementById(
+    "healthBar"
 );
 
-head.position.y = 6.4;
-
-head.castShadow = true;
-
-character.add(head);
-
-/* LEFT ARM */
-
-const leftArm = new THREE.Mesh(
-
-    new THREE.BoxGeometry(0.7,2.4,0.7),
-
-    new THREE.MeshStandardMaterial({
-        color:0xffd7b5
-    })
-
-);
-
-leftArm.position.set(-1.5,4,0);
-leftArm.castShadow = true;
-
-character.add(leftArm);
-
-/* RIGHT ARM */
-
-const rightArm = new THREE.Mesh(
-
-    new THREE.BoxGeometry(0.7,2.4,0.7),
-
-    new THREE.MeshStandardMaterial({
-        color:0xffd7b5
-    })
-
-);
-
-rightArm.position.set(1.5,4,0);
-rightArm.castShadow = true;
-
-character.add(rightArm);
-
-/* LEFT LEG */
-
-const leftLeg = new THREE.Mesh(
-
-    new THREE.BoxGeometry(0.8,2.5,0.8),
-
-    new THREE.MeshStandardMaterial({
-        color:0x1f2937
-    })
-
-);
-
-leftLeg.position.set(-0.5,1.8,0);
-leftLeg.castShadow = true;
-
-character.add(leftLeg);
-
-/* RIGHT LEG */
-
-const rightLeg = new THREE.Mesh(
-
-    new THREE.BoxGeometry(0.8,2.5,0.8),
-
-    new THREE.MeshStandardMaterial({
-        color:0x1f2937
-    })
-
-);
-
-rightLeg.position.set(0.5,1.8,0);
-rightLeg.castShadow = true;
-
-character.add(rightLeg);
-
-scene.add(character);
-
-/* MOVEMENT */
+/* ========================= */
+/* INPUT                     */
+/* ========================= */
 
 const keys = {};
 
-window.addEventListener("keydown", (e)=>{
-    keys[e.key.toLowerCase()] = true;
+window.addEventListener(
+    "keydown",
+    (e)=>{
+
+    keys[e.key.toLowerCase()] =
+    true;
+
 });
 
-window.addEventListener("keyup", (e)=>{
-    keys[e.key.toLowerCase()] = false;
+window.addEventListener(
+    "keyup",
+    (e)=>{
+
+    keys[e.key.toLowerCase()] =
+    false;
+
 });
 
-/* CAMERA FOLLOW */
+/* ========================= */
+/* CAMERA ROTATION           */
+/* ========================= */
 
-function updateCamera(){
+let camRotation = 0;
 
-    camera.position.x = character.position.x;
-    camera.position.z = character.position.z + 12;
+window.addEventListener(
+    "mousemove",
+    (e)=>{
 
-    camera.lookAt(
-        character.position.x,
-        4,
-        character.position.z
-    );
+    camRotation -=
+    e.movementX * 0.002;
+
+});
+
+/* ========================= */
+/* VALUES                    */
+/* ========================= */
+
+const velocity =
+new THREE.Vector3();
+
+const gravity = -0.015;
+
+/* ========================= */
+/* COLLISION                 */
+/* ========================= */
+
+function collision(a,b){
+
+    const box1 =
+    new THREE.Box3()
+    .setFromObject(a);
+
+    const box2 =
+    new THREE.Box3()
+    .setFromObject(b);
+
+    return box1.intersectsBox(box2);
 
 }
 
-/* ANIMATE */
+/* ========================= */
+/* ANIMATE                   */
+/* ========================= */
 
 function animate(){
 
-    requestAnimationFrame(animate);
+requestAnimationFrame(animate);
 
-    const speed = 0.15;
+/* MOVEMENT */
 
-    let moving = false;
+const speed = 0.12;
 
-    if(keys["w"]){
-        character.position.z -= speed;
-        character.rotation.y = 0;
-        moving = true;
+let moveX = 0;
+let moveZ = 0;
+
+if(keys["w"]) moveZ -= 1;
+if(keys["s"]) moveZ += 1;
+if(keys["a"]) moveX -= 1;
+if(keys["d"]) moveX += 1;
+
+/* CAMERA RELATIVE */
+
+const sin =
+Math.sin(camRotation);
+
+const cos =
+Math.cos(camRotation);
+
+const finalX =
+moveX * cos -
+moveZ * sin;
+
+const finalZ =
+moveZ * cos +
+moveX * sin;
+
+/* MOVE */
+
+player.position.x +=
+finalX * speed;
+
+player.position.z +=
+finalZ * speed;
+
+/* SMOOTH TURN */
+
+if(moveX !== 0 ||
+moveZ !== 0){
+
+    const targetRotation =
+
+    Math.atan2(
+        finalX,
+        finalZ
+    );
+
+    player.rotation.y +=
+
+    (targetRotation -
+    player.rotation.y)
+
+    * 0.15;
+
+}
+
+/* WALK */
+
+animateCharacter(
+    player,
+    moveX !== 0 ||
+    moveZ !== 0
+);
+
+/* GRAVITY */
+
+velocity.y += gravity;
+
+player.position.y +=
+velocity.y;
+
+/* OBJECTS */
+
+const objects = [
+    baseplate,
+    spawn,
+    pushBox
+];
+
+let grounded = false;
+
+objects.forEach(obj=>{
+
+    if(collision(player,obj)){
+
+        /* STAND */
+
+        if(player.position.y >
+        obj.position.y){
+
+            player.position.y =
+            obj.position.y + 1;
+
+            velocity.y = 0;
+
+            grounded = true;
+
+        }
+
+        /* PUSHABLE */
+
+        if(!obj.userData.anchored){
+
+            obj.position.x +=
+            finalX * 0.15;
+
+            obj.position.z +=
+            finalZ * 0.15;
+
+        }
+
+        /* WALL COLLISION */
+
+        else{
+
+            player.position.x -=
+            finalX * speed;
+
+            player.position.z -=
+            finalZ * speed;
+
+        }
+
     }
 
-    if(keys["s"]){
-        character.position.z += speed;
-        character.rotation.y = Math.PI;
-        moving = true;
-    }
+});
 
-    if(keys["a"]){
-        character.position.x -= speed;
-        character.rotation.y = Math.PI / 2;
-        moving = true;
-    }
+/* FALL */
 
-    if(keys["d"]){
-        character.position.x += speed;
-        character.rotation.y = -Math.PI / 2;
-        moving = true;
-    }
+if(!grounded){
 
-    /* WALK ANIMATION */
+    velocity.y += gravity;
 
-    if(moving){
+}
 
-        leftArm.rotation.x = Math.sin(Date.now() * 0.01) * 0.7;
-        rightArm.rotation.x = -Math.sin(Date.now() * 0.01) * 0.7;
+/* DEATH */
 
-        leftLeg.rotation.x = -Math.sin(Date.now() * 0.01) * 0.7;
-        rightLeg.rotation.x = Math.sin(Date.now() * 0.01) * 0.7;
+if(player.position.y < -25){
 
-    }else{
+    health = 0;
 
-        leftArm.rotation.x = 0;
-        rightArm.rotation.x = 0;
+    healthBar.style.width =
+    health + "%";
 
-        leftLeg.rotation.x = 0;
-        rightLeg.rotation.x = 0;
+    alert("You died");
 
-    }
+    location.reload();
 
-    updateCamera();
+}
 
-    renderer.render(scene,camera);
+/* CAMERA */
+
+camera.position.x =
+
+player.position.x +
+
+Math.sin(camRotation)
+* 12;
+
+camera.position.z =
+
+player.position.z +
+
+Math.cos(camRotation)
+* 12;
+
+camera.position.y =
+
+player.position.y + 8;
+
+camera.lookAt(
+
+    player.position.x,
+
+    player.position.y + 4,
+
+    player.position.z
+
+);
+
+/* RENDER */
+
+renderer.render(
+    scene,
+    camera
+);
 
 }
 
 animate();
 
-/* RESIZE */
+/* ========================= */
+/* RESIZE                    */
+/* ========================= */
 
-window.addEventListener("resize", ()=>{
+window.addEventListener(
+"resize",
 
-    camera.aspect = window.innerWidth / window.innerHeight;
+()=>{
 
-    camera.updateProjectionMatrix();
+camera.aspect =
 
-    renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
+window.innerWidth /
+window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+
+window.innerWidth,
+window.innerHeight
+
+);
 
 });
 
@@ -441,4 +703,3 @@ window.addEventListener("resize", ()=>{
 
 </body>
 </html>
-```
