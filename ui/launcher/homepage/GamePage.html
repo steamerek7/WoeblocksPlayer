@@ -1,6 +1,6 @@
-<!-- ========================= -->
-<!-- GAMEPAGE.HTML             -->
-<!-- ========================= -->
+<!-- ===================================== -->
+<!-- FULL GAMEPAGE.HTML (FIXED ENGINE)     -->
+<!-- ===================================== -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +34,7 @@ body{
     height:60px;
 
     background:#1b1d22;
-    border-bottom:1px solid #2d3138;
+    border-bottom:1px solid #2e3239;
 
     display:flex;
     align-items:center;
@@ -51,7 +51,7 @@ body{
     font-weight:bold;
 }
 
-.right{
+.infoText{
     color:#bdbdbd;
     font-size:14px;
 }
@@ -59,14 +59,16 @@ body{
 /* HEALTH */
 
 .healthContainer{
+
     position:absolute;
+
     top:80px;
     right:20px;
 
     width:260px;
-    height:26px;
+    height:24px;
 
-    background:#2b2b2b;
+    background:#2a2a2a;
 
     border-radius:999px;
 
@@ -75,11 +77,15 @@ body{
     border:2px solid #3d4148;
 
     z-index:100;
+
 }
 
 .healthBar{
+
     width:100%;
     height:100%;
+
+    border-radius:999px;
 
     background:
     linear-gradient(
@@ -88,23 +94,24 @@ body{
         #00c96b
     );
 
-    border-radius:999px;
-
     transition:0.2s;
+
 }
 
-/* INFO */
+/* GAME INFO */
 
-.info{
+.panel{
+
     position:absolute;
-    bottom:20px;
+
     left:20px;
+    bottom:20px;
 
     width:320px;
 
     background:rgba(20,20,20,0.85);
 
-    border:1px solid #333842;
+    border:1px solid #343842;
 
     border-radius:16px;
 
@@ -113,13 +120,14 @@ body{
     z-index:100;
 
     color:white;
+
 }
 
-.info h2{
+.panel h2{
     margin-bottom:12px;
 }
 
-.info p{
+.panel p{
     color:#c6c6c6;
     line-height:1.6;
 }
@@ -141,7 +149,7 @@ canvas{
         Woeblocks
     </div>
 
-    <div class="right">
+    <div class="infoText">
         WASD = Move | Mouse = Camera
     </div>
 
@@ -155,9 +163,9 @@ canvas{
 
 </div>
 
-<!-- INFO -->
+<!-- PANEL -->
 
-<div class="info">
+<div class="panel">
 
     <h2 id="gameTitle"></h2>
 
@@ -171,57 +179,241 @@ canvas{
 
 <!-- CHARACTER -->
 
-<script src="Character.js"></script>
+<script>
+
+/* ===================================== */
+/* CHARACTER SYSTEM                      */
+/* ===================================== */
+
+function createCharacter(){
+
+    const player = new THREE.Group();
+
+    /* BODY */
+
+    const torso = new THREE.Mesh(
+
+        new THREE.BoxGeometry(2,3,1),
+
+        new THREE.MeshStandardMaterial({
+            color:0x2563eb
+        })
+
+    );
+
+    torso.position.y = 4;
+
+    torso.castShadow = true;
+
+    player.add(torso);
+
+    /* HEAD */
+
+    const head = new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+            1.8,
+            1.8,
+            1.8
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:0xffd6b3
+        })
+
+    );
+
+    head.position.y = 6.2;
+
+    head.castShadow = true;
+
+    player.add(head);
+
+    /* LEFT ARM */
+
+    const leftArm = new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+            0.7,
+            2.5,
+            0.7
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:0xffd6b3
+        })
+
+    );
+
+    leftArm.position.set(
+        -1.5,
+        4,
+        0
+    );
+
+    leftArm.castShadow = true;
+
+    player.add(leftArm);
+
+    /* RIGHT ARM */
+
+    const rightArm = leftArm.clone();
+
+    rightArm.position.x = 1.5;
+
+    player.add(rightArm);
+
+    /* LEFT LEG */
+
+    const leftLeg = new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+            0.8,
+            2.5,
+            0.8
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:0x1f2937
+        })
+
+    );
+
+    leftLeg.position.set(
+        -0.5,
+        1.8,
+        0
+    );
+
+    leftLeg.castShadow = true;
+
+    player.add(leftLeg);
+
+    /* RIGHT LEG */
+
+    const rightLeg = leftLeg.clone();
+
+    rightLeg.position.x = 0.5;
+
+    player.add(rightLeg);
+
+    /* SAVE LIMBS */
+
+    player.userData = {
+
+        leftArm,
+        rightArm,
+        leftLeg,
+        rightLeg,
+
+        width:2,
+        height:7
+
+    };
+
+    return player;
+
+}
+
+/* WALK ANIMATION */
+
+function animateCharacter(
+    player,
+    moving
+){
+
+    const {
+        leftArm,
+        rightArm,
+        leftLeg,
+        rightLeg
+    }
+
+    = player.userData;
+
+    if(moving){
+
+        const walk =
+        Math.sin(
+            Date.now() * 0.01
+        ) * 0.7;
+
+        leftArm.rotation.x = walk;
+        rightArm.rotation.x = -walk;
+
+        leftLeg.rotation.x = -walk;
+        rightLeg.rotation.x = walk;
+
+    }
+
+    else{
+
+        leftArm.rotation.x = 0;
+        rightArm.rotation.x = 0;
+
+        leftLeg.rotation.x = 0;
+        rightLeg.rotation.x = 0;
+
+    }
+
+}
+
+</script>
 
 <script>
 
-/* ========================= */
-/* LOAD GAME INFO            */
-/* ========================= */
+/* ===================================== */
+/* GAME INFO                             */
+/* ===================================== */
 
 const game =
 JSON.parse(
-    localStorage.getItem("selectedGame")
-);
+localStorage.getItem(
+"selectedGame"
+));
 
-document.getElementById("gameTitle")
-.innerText = game.title;
+document.getElementById(
+"gameTitle"
+).innerText = game.title;
 
-document.getElementById("gameDescription")
-.innerText = game.description;
+document.getElementById(
+"gameDescription"
+).innerText =
+game.description;
 
-/* ========================= */
-/* SCENE                     */
-/* ========================= */
+/* ===================================== */
+/* SCENE                                 */
+/* ===================================== */
 
-const scene = new THREE.Scene();
+const scene =
+new THREE.Scene();
 
 scene.background =
 new THREE.Color(0x87ceeb);
 
-/* ========================= */
-/* CAMERA                    */
-/* ========================= */
+/* ===================================== */
+/* CAMERA                                */
+/* ===================================== */
 
 const camera =
 new THREE.PerspectiveCamera(
 
-    75,
+75,
 
-    window.innerWidth /
-    window.innerHeight,
+window.innerWidth /
+window.innerHeight,
 
-    0.1,
+0.1,
 
-    1000
+1000
 
 );
 
 camera.position.set(0,8,12);
 
-/* ========================= */
-/* RENDERER                  */
-/* ========================= */
+/* ===================================== */
+/* RENDERER                              */
+/* ===================================== */
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -232,36 +424,37 @@ new THREE.WebGLRenderer({
 
 renderer.setSize(
 
-    window.innerWidth,
-    window.innerHeight
+window.innerWidth,
+window.innerHeight
 
 );
 
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled =
+true;
 
 renderer.shadowMap.type =
 THREE.PCFSoftShadowMap;
 
 document.body.appendChild(
-    renderer.domElement
+renderer.domElement
 );
 
-/* ========================= */
-/* LIGHTING                  */
-/* ========================= */
+/* ===================================== */
+/* LIGHTING                              */
+/* ===================================== */
 
 const ambient =
 new THREE.AmbientLight(
-    0xffffff,
-    0.6
+0xffffff,
+0.6
 );
 
 scene.add(ambient);
 
 const sun =
 new THREE.DirectionalLight(
-    0xffffff,
-    1
+0xffffff,
+1
 );
 
 sun.position.set(20,30,20);
@@ -270,9 +463,9 @@ sun.castShadow = true;
 
 scene.add(sun);
 
-/* ========================= */
-/* TEXTURES                  */
-/* ========================= */
+/* ===================================== */
+/* TEXTURES                              */
+/* ===================================== */
 
 const loader =
 new THREE.TextureLoader();
@@ -290,199 +483,282 @@ THREE.RepeatWrapping;
 
 studTexture.repeat.set(8,8);
 
-/* ========================= */
-/* BASEPLATE                 */
-/* ========================= */
+/* ===================================== */
+/* BASEPLATE                             */
+/* ===================================== */
 
 const baseplate =
 new THREE.Mesh(
 
-    new THREE.BoxGeometry(
-        120,
-        1,
-        120
-    ),
+new THREE.BoxGeometry(
+120,
+1,
+120
+),
 
-    new THREE.MeshStandardMaterial({
-        map:studTexture
-    })
+new THREE.MeshStandardMaterial({
+map:studTexture
+})
 
 );
 
 baseplate.position.y = -0.5;
 
-baseplate.receiveShadow = true;
+baseplate.receiveShadow =
+true;
 
 baseplate.userData = {
-    anchored:true
+
+anchored:true,
+
+size:{
+x:120,
+y:1,
+z:120
+}
+
 };
 
 scene.add(baseplate);
 
-/* ========================= */
-/* SPAWNLOCATION             */
-/* ========================= */
+/* ===================================== */
+/* SPAWNLOCATION                         */
+/* ===================================== */
 
 const spawn =
 new THREE.Mesh(
 
-    new THREE.BoxGeometry(
-        6,
-        1,
-        6
-    ),
+new THREE.BoxGeometry(
+6,
+1,
+6
+),
 
-    new THREE.MeshStandardMaterial({
+new THREE.MeshStandardMaterial({
 
-        color:0x3b82f6,
+color:0x3b82f6,
 
-        emissive:0x2563eb,
+emissive:0x2563eb,
 
-        emissiveIntensity:0.4
+emissiveIntensity:0.4
 
-    })
+})
 
 );
 
-spawn.position.set(0,0.1,0);
+spawn.position.set(0,0.5,0);
 
 spawn.receiveShadow = true;
 
 spawn.userData = {
-    anchored:true
+
+anchored:true,
+
+size:{
+x:6,
+y:1,
+z:6
+}
+
 };
 
 scene.add(spawn);
 
-/* ========================= */
-/* TEST PUSHABLE PART        */
-/* ========================= */
+/* ===================================== */
+/* PUSHABLE PART                         */
+/* ===================================== */
 
 const pushBox =
 new THREE.Mesh(
 
-    new THREE.BoxGeometry(
-        4,
-        4,
-        4
-    ),
+new THREE.BoxGeometry(
+4,
+4,
+4
+),
 
-    new THREE.MeshStandardMaterial({
-        map:studTexture
-    })
+new THREE.MeshStandardMaterial({
+map:studTexture
+})
 
 );
 
-pushBox.position.set(10,2,0);
+pushBox.position.set(
+10,
+2,
+0
+);
 
 pushBox.castShadow = true;
 
 pushBox.userData = {
 
-    anchored:false,
+anchored:false,
 
-    velocity:
-    new THREE.Vector3()
+size:{
+x:4,
+y:4,
+z:4
+}
 
 };
 
 scene.add(pushBox);
 
-/* ========================= */
-/* PLAYER                    */
-/* ========================= */
+/* ===================================== */
+/* PLAYER                                */
+/* ===================================== */
 
 const player =
 createCharacter();
 
 scene.add(player);
 
-/* ========================= */
-/* HEALTH                    */
-/* ========================= */
+/* SPAWN PLAYER */
+
+function respawn(){
+
+player.position.set(
+0,
+1,
+0
+);
+
+velocity.y = 0;
+
+health = 100;
+
+healthBar.style.width =
+"100%";
+
+}
+
+respawn();
+
+/* ===================================== */
+/* HEALTH                                */
+/* ===================================== */
 
 let health = 100;
 
 const healthBar =
 document.getElementById(
-    "healthBar"
+"healthBar"
 );
 
-/* ========================= */
-/* INPUT                     */
-/* ========================= */
+/* ===================================== */
+/* INPUT                                 */
+/* ===================================== */
 
 const keys = {};
 
 window.addEventListener(
-    "keydown",
-    (e)=>{
+"keydown",
+(e)=>{
 
-    keys[e.key.toLowerCase()] =
-    true;
+keys[
+e.key.toLowerCase()
+] = true;
 
 });
 
 window.addEventListener(
-    "keyup",
-    (e)=>{
+"keyup",
+(e)=>{
 
-    keys[e.key.toLowerCase()] =
-    false;
+keys[
+e.key.toLowerCase()
+] = false;
 
 });
 
-/* ========================= */
-/* CAMERA ROTATION           */
-/* ========================= */
+/* ===================================== */
+/* CAMERA ROTATION                       */
+/* ===================================== */
 
 let camRotation = 0;
 
 window.addEventListener(
-    "mousemove",
-    (e)=>{
+"mousemove",
+(e)=>{
 
-    camRotation -=
-    e.movementX * 0.002;
+camRotation -=
+e.movementX * 0.002;
 
 });
 
-/* ========================= */
-/* VALUES                    */
-/* ========================= */
+/* ===================================== */
+/* PHYSICS                               */
+/* ===================================== */
 
 const velocity =
 new THREE.Vector3();
 
 const gravity = -0.015;
 
-/* ========================= */
-/* COLLISION                 */
-/* ========================= */
+/* ===================================== */
+/* COLLISION                             */
+/* ===================================== */
 
-function collision(a,b){
+function checkCollision(
+player,
+obj
+){
 
-    const box1 =
-    new THREE.Box3()
-    .setFromObject(a);
+const pWidth =
+player.userData.width;
 
-    const box2 =
-    new THREE.Box3()
-    .setFromObject(b);
+const pHeight =
+player.userData.height;
 
-    return box1.intersectsBox(box2);
+const oSize =
+obj.userData.size;
+
+return (
+
+Math.abs(
+player.position.x -
+obj.position.x
+)
+
+<
+
+(pWidth/2) +
+(oSize.x/2)
+
+&&
+
+Math.abs(
+player.position.z -
+obj.position.z
+)
+
+<
+
+(pWidth/2) +
+(oSize.z/2)
+
+&&
+
+player.position.y <=
+obj.position.y +
+(oSize.y/2) + 1
+
+);
 
 }
 
-/* ========================= */
-/* ANIMATE                   */
-/* ========================= */
+/* ===================================== */
+/* ANIMATE                               */
+/* ===================================== */
 
 function animate(){
 
-requestAnimationFrame(animate);
+requestAnimationFrame(
+animate
+);
 
-/* MOVEMENT */
+/* MOVE */
 
 const speed = 0.12;
 
@@ -503,14 +779,24 @@ const cos =
 Math.cos(camRotation);
 
 const finalX =
+
 moveX * cos -
 moveZ * sin;
 
 const finalZ =
+
 moveZ * cos +
 moveX * sin;
 
-/* MOVE */
+/* SAVE OLD POS */
+
+const oldX =
+player.position.x;
+
+const oldZ =
+player.position.z;
+
+/* MOVE PLAYER */
 
 player.position.x +=
 finalX * speed;
@@ -523,28 +809,31 @@ finalZ * speed;
 if(moveX !== 0 ||
 moveZ !== 0){
 
-    const targetRotation =
+const targetRotation =
 
-    Math.atan2(
-        finalX,
-        finalZ
-    );
+Math.atan2(
+finalX,
+finalZ
+);
 
-    player.rotation.y +=
+player.rotation.y +=
 
-    (targetRotation -
-    player.rotation.y)
+(targetRotation -
+player.rotation.y)
 
-    * 0.15;
+* 0.15;
 
 }
 
 /* WALK */
 
 animateCharacter(
-    player,
-    moveX !== 0 ||
-    moveZ !== 0
+
+player,
+
+moveX !== 0 ||
+moveZ !== 0
+
 );
 
 /* GRAVITY */
@@ -557,81 +846,104 @@ velocity.y;
 /* OBJECTS */
 
 const objects = [
-    baseplate,
-    spawn,
-    pushBox
+
+baseplate,
+spawn,
+pushBox
+
 ];
 
 let grounded = false;
 
 objects.forEach(obj=>{
 
-    if(collision(player,obj)){
+if(checkCollision(
+player,
+obj
+)){
 
-        /* STAND */
+const top =
 
-        if(player.position.y >
-        obj.position.y){
+obj.position.y +
 
-            player.position.y =
-            obj.position.y + 1;
+(obj.userData.size.y/2);
 
-            velocity.y = 0;
+/* STAND */
 
-            grounded = true;
+if(
 
-        }
+player.position.y <=
+top + 1
 
-        /* PUSHABLE */
+){
 
-        if(!obj.userData.anchored){
+player.position.y =
+top + 1;
 
-            obj.position.x +=
-            finalX * 0.15;
+velocity.y = 0;
 
-            obj.position.z +=
-            finalZ * 0.15;
+grounded = true;
 
-        }
+}
 
-        /* WALL COLLISION */
+/* PUSHABLE */
 
-        else{
+if(
+!obj.userData.anchored
+){
 
-            player.position.x -=
-            finalX * speed;
+obj.position.x +=
+finalX * 0.12;
 
-            player.position.z -=
-            finalZ * speed;
+obj.position.z +=
+finalZ * 0.12;
 
-        }
+}
 
-    }
+/* WALL */
+
+else{
+
+if(obj !== baseplate
+&& obj !== spawn){
+
+player.position.x =
+oldX;
+
+player.position.z =
+oldZ;
+
+}
+
+}
+
+}
 
 });
 
 /* FALL */
 
-if(!grounded){
+if(player.position.y < -20){
 
-    velocity.y += gravity;
+health = 0;
 
-}
+healthBar.style.width =
+"0%";
 
-/* DEATH */
+/* RESPAWN */
 
-if(player.position.y < -25){
+setTimeout(()=>{
 
-    health = 0;
+respawn();
 
-    healthBar.style.width =
-    health + "%";
-
-    alert("You died");
-
-    location.reload();
+},500);
 
 }
+
+/* HEALTH */
+
+healthBar.style.width =
+health + "%";
 
 /* CAMERA */
 
@@ -639,15 +951,17 @@ camera.position.x =
 
 player.position.x +
 
-Math.sin(camRotation)
-* 12;
+Math.sin(
+camRotation
+) * 12;
 
 camera.position.z =
 
 player.position.z +
 
-Math.cos(camRotation)
-* 12;
+Math.cos(
+camRotation
+) * 12;
 
 camera.position.y =
 
@@ -655,28 +969,28 @@ player.position.y + 8;
 
 camera.lookAt(
 
-    player.position.x,
+player.position.x,
 
-    player.position.y + 4,
+player.position.y + 4,
 
-    player.position.z
+player.position.z
 
 );
 
 /* RENDER */
 
 renderer.render(
-    scene,
-    camera
+scene,
+camera
 );
 
 }
 
 animate();
 
-/* ========================= */
-/* RESIZE                    */
-/* ========================= */
+/* ===================================== */
+/* RESIZE                                */
+/* ===================================== */
 
 window.addEventListener(
 "resize",
